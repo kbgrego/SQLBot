@@ -29,6 +29,13 @@ public class ConnectDatabase{
 	public  Connection MainSQLConnection;
 	private String     DatabaseName = "main.db";			
 		
+	/** 
+	 * Initial file db with a name of file 
+	 */
+	public ConnectDatabase(String string) {
+		ChangeMainDatabase(string);
+	}
+
 	public void EstablishConnect() throws ClassNotFoundException, SQLException{
 		
 		if( MainSQLConnection==null || MainSQLConnection.isClosed() ) {
