@@ -27,8 +27,16 @@ public class ConnectDatabase{
 	public  List<Table> listTables = new ArrayList<Table>();
 	
 	public  Connection MainSQLConnection;
-	private String     DatabaseName = "main.db";			
+	private String     DatabaseName = "main.db";
+	private boolean    DEBUG = false;
 		
+	/** 
+	 * Initial file db with a name of file 
+	 */
+	public ConnectDatabase(String string) {
+		ChangeMainDatabase(string);
+	}
+
 	public void EstablishConnect() throws ClassNotFoundException, SQLException{
 		
 		if( MainSQLConnection==null || MainSQLConnection.isClosed() ) {
@@ -94,11 +102,17 @@ public class ConnectDatabase{
 	public ResultSet executeQuery(String query) {
 		try{
 			EstablishConnect();
+			if( DEBUG )
+				System.out.println(query);
 			return MainSQLConnection.createStatement()
 					                .executeQuery(query);
 		} catch (Exception e) {
 			
 		}
 		return null;
+	}
+	
+	public void onDEBUG(){
+		DEBUG = true;
 	}
 }
