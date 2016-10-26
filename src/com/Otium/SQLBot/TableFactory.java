@@ -39,7 +39,7 @@ public class TableFactory<T> {
 		Table.FieldsOfTable.add(new FIELD("rid"), FieldDataType.INTEGER, Key.PRIMARY, Increment.AUTO);
 				
 		for(java.lang.reflect.Field field : MainClass.getDeclaredFields())
-			if( field.isAnnotationPresent(TableField.class) )
+			if(!field.isAnnotationPresent(SQLBotIgnore.class) )
 				Table.FieldsOfTable.add(new FIELD(field.getName()), FieldDataType.TEXT, Key.NONE, Increment.NOAUTO);
 	}
 	
