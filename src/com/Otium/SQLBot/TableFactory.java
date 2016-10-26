@@ -12,7 +12,9 @@ import com.Otium.SQLBot.Table.TABLE;
  * Copyright 2016 Kabanov Gregory 
  */
 
-public class TableFactory<T> {
+public class TableFactory<T extends TableObject> {
+	protected FIELD RID_FIELD = new FIELD("rid");
+	
 	private ConnectDatabase Connection;
 	private TABLE nameTable;
 	private Table Table;
@@ -36,7 +38,7 @@ public class TableFactory<T> {
 	}
 
 	private void initialFields() {
-		Table.FieldsOfTable.add(new FIELD("rid"), FieldDataType.INTEGER, Key.PRIMARY, Increment.AUTO);
+		Table.FieldsOfTable.add(RID_FIELD, FieldDataType.INTEGER, Key.PRIMARY, Increment.AUTO);
 				
 		for(java.lang.reflect.Field field : MainClass.getDeclaredFields())
 			if(!field.isAnnotationPresent(SQLBotIgnore.class) )
@@ -52,16 +54,18 @@ public class TableFactory<T> {
 		for(Record row : data){
 			try {
 				T obj = MainClass.newInstance();
+				obj.setFactory((TableFactory<? super TableObject>) this);
 				list.add(obj);
 				for(Parameter param : row.getParameters()){
 					try {
 						String seterName = "set" + getCapitalize(param.Field.Name.toString());
 						Method seter = MainClass.getMethod(seterName, args);
-						seter.invoke(obj, new String[]{param.Value});
+						seter.invoke(obj, param.Value);
 					} catch (Exception e){
 						//silence is golden
 					}
 				}
+		        obj.setListners();
 			} catch (Exception e) {
 				//silence is golden
 			}
@@ -72,6 +76,38 @@ public class TableFactory<T> {
 
 	private String getCapitalize(String string) {		 
 		return string.toUpperCase().substring(0,1) + string.substring(1);
+	}
+
+	public void Create(T tableObject) {
+		if(tableObject.getRid().equals("0"))	
+			Table.RecordInsert(getObjectRecord(tableObject));
+					
+	}
+	
+	public void Update(T tableObject) {
+		if(!tableObject.getRid().equals("0")){
+			Record record = getObjectRecord(tableObject);
+			
+			CollectionRecordsCondition conditions = new CollectionRecordsCondition();
+			
+			conditions.add(Table.getFieldByName(RID_FIELD),ConditionType.EQUALS,tableObject.getRid());			
+			
+			Table.RecordUpdate(record, conditions);
+		}			
+	}
+	
+	private Record getObjectRecord(T tableObject) {
+		Record record = new Record();
+		for(Field field:Table.FieldsOfTable){
+			try {
+				String geterName = "get" + getCapitalize(field.Name.toString());
+				Method seter = MainClass.getMethod(geterName);
+				record.addParameter(field, (String) seter.invoke(tableObject));
+			} catch (Exception e){
+				//silence is golden
+			}
+		}
+		return record;
 	}
 
 }
