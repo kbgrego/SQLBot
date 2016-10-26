@@ -54,8 +54,13 @@ public class TableFactory<T> {
 				T obj = MainClass.newInstance();
 				list.add(obj);
 				for(Parameter param : row.getParameters()){
-						Method seter = MainClass.getMethod("set" + param.Field.Name.toString(), args);
+					try {
+						String seterName = "set" + getCapitalize(param.Field.Name.toString());
+						Method seter = MainClass.getMethod(seterName, args);
 						seter.invoke(obj, new String[]{param.Value});
+					} catch (Exception e){
+						//silence is golden
+					}
 				}
 			} catch (Exception e) {
 				//silence is golden
@@ -63,6 +68,10 @@ public class TableFactory<T> {
 		}
 		
 		return list;
+	}
+
+	private String getCapitalize(String string) {		 
+		return string.toUpperCase().substring(0,1) + string.substring(1);
 	}
 
 }
