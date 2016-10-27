@@ -1,3 +1,6 @@
+/**
+ * Copyright 2016 Kabanov Gregory 
+ */
 package com.Otium.SQLBot;
 
 import java.lang.reflect.Method;
@@ -7,10 +10,6 @@ import java.util.List;
 import com.Otium.SQLBot.Field.FIELD;
 import com.Otium.SQLBot.Record.Parameter;
 import com.Otium.SQLBot.Table.TABLE;
-
-/**
- * Copyright 2016 Kabanov Gregory 
- */
 
 public class TableFactory<T extends TableObject> {
 	protected FIELD RID_FIELD = new FIELD("rid");
@@ -47,13 +46,13 @@ public class TableFactory<T extends TableObject> {
 	
 	public List<T> getList(){
 		List<T> list = new ArrayList<T>();
-		Class[] args = new Class[]{String.class};
+		Class<?>[] args = new Class[]{String.class};
 		
 		List<Record> data = Table.Select();
 		
 		for(Record row : data){
 			try {
-				T obj = MainClass.newInstance();
+				T obj = MainClass.getConstructor(this.getClass()).newInstance(this);
 				obj.setFactory(this);
 				list.add(obj);
 				for(Parameter param : row.getParameters()){
@@ -62,12 +61,14 @@ public class TableFactory<T extends TableObject> {
 						Method seter = MainClass.getMethod(seterName, args);
 						seter.invoke(obj, param.Value);
 					} catch (Exception e){
-						//silence is golden
+						if( Connection.isDEBUG() )
+							System.err.println(e.getClass().getName() + ": " + e.getMessage());
 					}
 				}
 		        obj.setListners();
 			} catch (Exception e) {
-				//silence is golden
+				if( Connection.isDEBUG() )
+					System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			}
 		}
 		
@@ -81,7 +82,20 @@ public class TableFactory<T extends TableObject> {
 	protected void Create(TableObject tableObject) {
 		if(!tableObject.isHasRid())	
 			Table.RecordInsert(getObjectRecord(tableObject));
-					
+		tableObject.setRid(getLastCreatedIndex(tableObject));			
+	}
+	
+	private String getLastCreatedIndex(TableObject tableObject){
+		try {
+			CollectionRecordsCondition conditions = new CollectionRecordsCondition();
+			List<TableSorting> sorting = new ArrayList<TableSorting>();
+			Record record = getObjectRecord(tableObject);
+			conditions.add(record);							
+			sorting.add(new TableSorting(Table.getFieldByName(RID_FIELD), SortType.ASC));					
+			return Table.Select(conditions, sorting , 1).get(0).getParameterByField(Table.getFieldByName(RID_FIELD)).Value;
+		} catch (FieldNotFoundException e) {
+			return "0";
+		} 
 	}
 	
 	protected void Update(TableObject tableObject) {
@@ -109,6 +123,7 @@ public class TableFactory<T extends TableObject> {
 	private Record getObjectRecord(TableObject tableObject) {
 		Record record = new Record();
 		for(Field field:Table.FieldsOfTable){
+			if(field.Name == RID_FIELD) continue;
 			try {
 				String geterName = "get" + getCapitalize(field.Name.toString());
 				Method seter = MainClass.getMethod(geterName);
