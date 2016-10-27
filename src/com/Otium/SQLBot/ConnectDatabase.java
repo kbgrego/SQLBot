@@ -113,6 +113,10 @@ public class ConnectDatabase{
 		return null;
 	}
 	
+	protected boolean isDEBUG(){
+		return DEBUG;
+	}
+	
 	public void onDEBUG(){
 		DEBUG = true;
 	}
