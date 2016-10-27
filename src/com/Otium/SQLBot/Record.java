@@ -21,7 +21,8 @@ public class Record{
 	}
 	
 	public void addParameter(Field field, Object value){
-		Parameters.add(field, value.toString());
+		if(value!=null)
+			Parameters.add(field, value.toString());
 	}
 	
 	public CollectionParameters getParameters(){
