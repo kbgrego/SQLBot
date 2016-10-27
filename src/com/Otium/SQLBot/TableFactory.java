@@ -54,7 +54,7 @@ public class TableFactory<T extends TableObject> {
 		for(Record row : data){
 			try {
 				T obj = MainClass.newInstance();
-				obj.setFactory((TableFactory<? super TableObject>) this);
+				obj.setFactory(this);
 				list.add(obj);
 				for(Parameter param : row.getParameters()){
 					try {
@@ -78,13 +78,13 @@ public class TableFactory<T extends TableObject> {
 		return string.toUpperCase().substring(0,1) + string.substring(1);
 	}
 
-	public void Create(T tableObject) {
+	protected void Create(TableObject tableObject) {
 		if(!tableObject.isHasRid())	
 			Table.RecordInsert(getObjectRecord(tableObject));
 					
 	}
 	
-	public void Update(T tableObject) {
+	protected void Update(TableObject tableObject) {
 		if(tableObject.isHasRid()){
 			Record record = getObjectRecord(tableObject);
 			
@@ -96,7 +96,7 @@ public class TableFactory<T extends TableObject> {
 		}			
 	}
 	
-	public void Delete(T tableObject) {
+	protected void Delete(TableObject tableObject) {
 		if(tableObject.isHasRid()){		
 			CollectionRecordsCondition conditions = new CollectionRecordsCondition();
 			
@@ -106,7 +106,7 @@ public class TableFactory<T extends TableObject> {
 		}			
 	}
 	
-	private Record getObjectRecord(T tableObject) {
+	private Record getObjectRecord(TableObject tableObject) {
 		Record record = new Record();
 		for(Field field:Table.FieldsOfTable){
 			try {
