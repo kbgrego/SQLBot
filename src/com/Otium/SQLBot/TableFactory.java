@@ -96,6 +96,16 @@ public class TableFactory<T extends TableObject> {
 		}			
 	}
 	
+	public void Delete(T tableObject) {
+		if(!tableObject.getRid().equals("0")){		
+			CollectionRecordsCondition conditions = new CollectionRecordsCondition();
+			
+			conditions.add(Table.getFieldByName(RID_FIELD),ConditionType.EQUALS,tableObject.getRid());			
+			
+			Table.RecordDelete(conditions);
+		}			
+	}
+	
 	private Record getObjectRecord(T tableObject) {
 		Record record = new Record();
 		for(Field field:Table.FieldsOfTable){

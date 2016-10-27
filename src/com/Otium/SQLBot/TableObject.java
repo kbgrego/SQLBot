@@ -15,18 +15,19 @@ public abstract class TableObject {
 	public void setFactory(TableFactory<? super TableObject> table){
 		this.Factory = table;		
 	}
-		
-	@SQLBotIgnore
-	public void Create(){
-		Factory.Create(this);
-	}
 	
 	@SQLBotIgnore
-	public void Update(){
+	public void Save(){
 		if(Rid==0)
 			Factory.Create(this);
 		else
 			Factory.Update(this);
+	}
+	
+	@SQLBotIgnore
+	public void Delete(){
+		if(Rid!=0)
+			Factory.Delete(this);
 	}
 	
 	public void setRid(String rid){
