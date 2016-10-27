@@ -5,7 +5,7 @@ package com.Otium.SQLBot;
  */
 
 public abstract class TableObject {
-	@SQLBotIgnore private TableFactory<? extends TableObject> Factory;
+	@SQLBotIgnore private TableFactory<?> Factory;
 	
 	@SQLBotIgnore private Integer Rid = 0; 
 	
@@ -13,14 +13,14 @@ public abstract class TableObject {
 		
 	}
 	
-	public TableObject(TableFactory<? extends TableObject> table){
+	public TableObject(TableFactory<?> table){
 		setFactory(table);
 	}
 	
 	public abstract void setListners();
 
 	@SQLBotIgnore 
-	public void setFactory(TableFactory<? extends TableObject> table){
+	public void setFactory(TableFactory<?> table){
 		this.Factory = table;		
 	}
 	
