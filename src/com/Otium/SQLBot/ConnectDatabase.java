@@ -107,7 +107,8 @@ public class ConnectDatabase{
 			return MainSQLConnection.createStatement()
 					                .executeQuery(query);
 		} catch (Exception e) {
-			
+			if( DEBUG )
+				System.err.println(e.getClass().getName() + ": " + e.getMessage());
 		}
 		return null;
 	}
