@@ -17,10 +17,10 @@ public class Field{
 	}
 	
 	String getCreatingString(){
-		return this.Name + " " + 
-		           this.Type + " " + 
-				   this.Key  + " " + 
-		           this.Increment;		
+		return "`" + this.Name + "` " + 
+		             this.Type + " " + 
+				     this.Key  + " " + 
+		             this.Increment;		
 	}
 	
 	public boolean isNeedQuotes(){

@@ -99,7 +99,9 @@ public class Table{
 			if( collectionParameters.indexOf(parameter) != FIRST_INDEX )
 				sequence.append(",");
 			
-			sequence.append(parameter.Field.Name);
+			sequence.append("`")
+			        .append(parameter.Field.Name)
+			        .append("`");
 		}
 		return sequence.toString();
 	}
