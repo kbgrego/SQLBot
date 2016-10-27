@@ -127,7 +127,11 @@ public class TableFactory<T extends TableObject> {
 			try {
 				String geterName = "get" + getCapitalize(field.Name.toString());
 				Method seter = MainClass.getMethod(geterName);
-				record.addParameter(field, (String) seter.invoke(tableObject));
+				Object value = seter.invoke(tableObject);
+				if(value instanceof TableObject)
+					record.addParameter(field, ((TableObject)value).getRid() );
+				else
+					record.addParameter(field, value.toString());
 			} catch (Exception e){
 				//silence is golden
 			}
