@@ -82,9 +82,9 @@ public class Table{
 	private String getQueryToDoRecordInsert(Record record){
 		StringBuffer query  = new StringBuffer();
 		
-		query.append("INSERT INTO ") 
+		query.append("INSERT INTO `") 
 		     .append(this.NameOfTable)
-		     .append("(") 
+		     .append("` (") 
 		     	.append(getSequenceOfParametersFields(record.getParameters()))
 		     .append(") VALUES (")
              	.append(getSequenceOfParametersValues(record.getParameters()))
