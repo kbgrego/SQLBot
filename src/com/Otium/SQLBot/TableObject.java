@@ -18,15 +18,15 @@ public abstract class TableObject {
 	
 	@SQLBotIgnore
 	public void Save(){
-		if(Rid==0)
-			Factory.Create(this);
-		else
+		if(isHasRid())
 			Factory.Update(this);
+		else
+			Factory.Create(this);
 	}
 	
 	@SQLBotIgnore
 	public void Delete(){
-		if(Rid!=0)
+		if(isHasRid())
 			Factory.Delete(this);
 	}
 	
@@ -36,6 +36,10 @@ public abstract class TableObject {
 	
 	public String getRid(){
 		return Rid.toString();
+	}
+	
+	public boolean isHasRid(){
+		return Rid!=0;
 	}
 	
 }

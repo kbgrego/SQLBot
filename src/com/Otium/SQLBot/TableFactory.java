@@ -79,13 +79,13 @@ public class TableFactory<T extends TableObject> {
 	}
 
 	public void Create(T tableObject) {
-		if(tableObject.getRid().equals("0"))	
+		if(!tableObject.isHasRid())	
 			Table.RecordInsert(getObjectRecord(tableObject));
 					
 	}
 	
 	public void Update(T tableObject) {
-		if(!tableObject.getRid().equals("0")){
+		if(tableObject.isHasRid()){
 			Record record = getObjectRecord(tableObject);
 			
 			CollectionRecordsCondition conditions = new CollectionRecordsCondition();
@@ -97,7 +97,7 @@ public class TableFactory<T extends TableObject> {
 	}
 	
 	public void Delete(T tableObject) {
-		if(!tableObject.getRid().equals("0")){		
+		if(tableObject.isHasRid()){		
 			CollectionRecordsCondition conditions = new CollectionRecordsCondition();
 			
 			conditions.add(Table.getFieldByName(RID_FIELD),ConditionType.EQUALS,tableObject.getRid());			
