@@ -2,11 +2,20 @@ package com.Otium.SQLBot;
 
 import java.util.ArrayList;
 
+import com.Otium.SQLBot.Record.Parameter;
+
 public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 	private static final long serialVersionUID = -2527722864096743032L;
 
 	public boolean add(RecordsCondition condition){
 		return super.add(condition);
+	}
+	
+	public boolean add(Record record){
+		if(record!=null)
+			for(Parameter param : record.getParameters())
+				add(param.Field, ConditionType.EQUALS, param.Value);
+		return true;
 	}
 	
 	public boolean add(Field field, ConditionType type, String value){
