@@ -10,7 +10,11 @@ public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 	private CollectionRecordsConditionType type;
 	
 	public CollectionRecordsCondition() {
-		type = CollectionRecordsConditionType.AND;
+		this(CollectionRecordsConditionType.AND);
+	}
+	
+	public CollectionRecordsCondition(CollectionRecordsConditionType type) {
+		this.type = type;
 	}
 
 	public boolean add(RecordsCondition condition){
@@ -32,6 +36,10 @@ public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 		return super.add(new RecordsCondition(field, type, value.toString()));
 	}
 
+	public CollectionRecordsConditionType setType() {
+		return type;
+	}	
+	
 	public CollectionRecordsConditionType getType() {
 		return type;
 	}
