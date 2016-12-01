@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.Otium.SQLBot.Field.FIELD;
-import com.Otium.SQLBot.Record.Parameter;
 
 public class Table{
 	private static final int FIRST_INDEX = 0;
