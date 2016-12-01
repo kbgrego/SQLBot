@@ -133,7 +133,8 @@ public class Table{
 		     .append(this.NameOfTable)
 		     .append("` SET ")
 			 .append(getSequenceOfFieldsSetValue(record.getParameters()))
-		     .append(getSequenceOfConditions(conditions));	
+		     .append(conditions.getQuerySequence());	
+
 	
 		return qeury.toString();
 	}
@@ -169,7 +170,7 @@ public class Table{
 		qeury.append("DELETE FROM `") 
 			 .append(this.NameOfTable)
 			 .append("`")
-		     .append(getSequenceOfConditions(conditions));			
+		     .append(conditions.getQuerySequence());			
 
 		return qeury.toString();
 	}
@@ -183,7 +184,7 @@ public class Table{
 	}
 	
 	public List<Record> Select(CollectionRecordsCondition conditions, int limit){
-		return Select(conditions, new ArrayList<TableSorting>(), limit);
+		return Select(conditions, new CollectionSorting(), limit);
 	}
 	
 	public List<Record> Select(CollectionRecordsCondition conditions, List<TableSorting> sorting, int limit){
@@ -216,13 +217,13 @@ public class Table{
 	
 
 	private String getQueryToDoSelect(CollectionRecordsCondition conditions, List<TableSorting> sorting, int limit){
-		StringBuffer qeury = new StringBuffer();
+		StringBuffer qeury = new StringBuffer();			
 		
 		qeury.append("SELECT * FROM `")
 		     .append(this.NameOfTable)
 		     .append("`")			
-			 .append(getSequenceOfConditions(conditions))			
-			 .append(getSequenceOfSorting(sorting))							
+			 .append(conditions.getQuerySequence())			
+			 .append(((CollectionSorting)sorting).getQuerySequence())							
 			 .append(getLimitParameter(limit));
 		
 		return qeury.toString();
@@ -233,37 +234,6 @@ public class Table{
 			return " LIMIT " + limit;
 		else
 			return "";
-	}
-	
-	private String getSequenceOfSorting(List<TableSorting> sorting){
-		
-		StringBuffer sequence = new StringBuffer();
-		
-		for(TableSorting sort : sorting)
-			if(sorting.indexOf(sort) == FIRST_INDEX)
-				sequence.append(" ORDER BY ")
-						.append(sort);
-			else
-				sequence.append(", ")
-				        .append(sort);
-		
-		return sequence.toString();
-	}
-	
-	private String getSequenceOfConditions(CollectionRecordsCondition conds){
-		StringBuffer sb = new StringBuffer();		
-		boolean flag=false;
-		
-		for(RecordsCondition condition : conds){
-			if(flag)
-				sb.append(" ").append(conds.getType().toString()).append(" ");
-			else
-				sb.append(" where ");
-			sb.append(condition);
-			flag=true;
-		}
-		
-		return sb.toString();
 	}
 	
 	public Field getFieldByName(FIELD name){
