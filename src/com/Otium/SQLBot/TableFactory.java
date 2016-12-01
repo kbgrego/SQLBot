@@ -95,13 +95,12 @@ public class TableFactory<T extends TableObject> {
 	
 	protected Record getObjectRecord(TableObject tableObject) {
 		Record record = new Record();
-		for(Field field:Table.FieldsOfTable){
-			if(field.Name == RID_FIELD) continue;
+		for(Field field:Table.FieldsOfTable){			
 			try {
 				String geterName = "get" + getCapitalize(field.Name.toString());
 				Method seter = MainClass.getMethod(geterName);
 				Object value = seter.invoke(tableObject);
-				if(value == null)
+				if(value == null || (field.Name == RID_FIELD && value.equals("0")))
 					continue;
 				else if(value instanceof TableObject)
 					record.addParameter(field, ((TableObject)value).getRid() );
