@@ -107,7 +107,7 @@ public class ConnectDatabase{
 			return MainSQLConnection.createStatement()
 					                .executeQuery(query);
 		} catch (Exception e) {
-			if( DEBUG )
+			if( DEBUG && !e.getMessage().equals("query does not return ResultSet"))
 				System.err.println(e.getClass().getName() + ": " + e.getMessage());
 		}
 		return null;
