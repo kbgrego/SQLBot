@@ -104,7 +104,7 @@ public class Table{
 		     .append(this.NameOfTable)
 		     .append("` SET ")
 			 .append(record.getParameters().getQuerySequenceOfFieldsSetValue())
-		     .append(getSequenceOfConditions(conditions));	
+		     .append(conditions.getQuerySequence());	
 	
 		return qeury.toString();
 	}
@@ -119,7 +119,7 @@ public class Table{
 		qeury.append("DELETE FROM `") 
 			 .append(this.NameOfTable)
 			 .append("`")
-		     .append(getSequenceOfConditions(conditions));			
+		     .append(conditions.getQuerySequence());			
 
 		return qeury.toString();
 	}
@@ -171,7 +171,7 @@ public class Table{
 		qeury.append("SELECT * FROM `")
 		     .append(this.NameOfTable)
 		     .append("`")			
-			 .append(getSequenceOfConditions(conditions))			
+			 .append(conditions.getQuerySequence())			
 			 .append(((CollectionSorting)sorting).getQuerySequence())							
 			 .append(getLimitParameter(limit));
 		
@@ -183,22 +183,6 @@ public class Table{
 			return " LIMIT " + limit;
 		else
 			return "";
-	}
-	
-	private String getSequenceOfConditions(CollectionRecordsCondition conds){
-		StringBuffer sb = new StringBuffer();		
-		boolean flag=false;
-		
-		for(RecordsCondition condition : conds){
-			if(flag)
-				sb.append(" ").append(conds.getType().toString()).append(" ");
-			else
-				sb.append(" where ");
-			sb.append(condition);
-			flag=true;
-		}
-		
-		return sb.toString();
 	}
 	
 	public Field getFieldByName(FIELD name){

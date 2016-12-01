@@ -6,6 +6,7 @@ import com.Otium.SQLBot.Record.Parameter;
 
 public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 	private static final long serialVersionUID = -2527722864096743032L;
+	private static final int FIRST_INDEX = 0;
 	
 	private CollectionRecordsConditionType type;
 	
@@ -42,5 +43,24 @@ public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 	
 	public CollectionRecordsConditionType getType() {
 		return type;
+	}
+	
+	public String getQuerySequence(){
+		StringBuffer sb = new StringBuffer();		
+		
+		for(RecordsCondition condition : this){
+			if(isFirst(condition))
+				sb.append(" where ");
+			else
+				sb.append(" ").append(getType().toString()).append(" ");
+				
+			sb.append(condition);
+		}
+		
+		return sb.toString();
+	}
+
+	private boolean isFirst(RecordsCondition condition) {
+		return indexOf(condition) == FIRST_INDEX;
 	}
 }
