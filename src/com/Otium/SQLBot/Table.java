@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.Otium.SQLBot.Field.FIELD;
-import com.Otium.SQLBot.Record.Parameter;
 
 public class Table{
 	private static final int FIRST_INDEX = 0;
@@ -85,41 +84,12 @@ public class Table{
 		query.append("INSERT INTO `") 
 		     .append(this.NameOfTable)
 		     .append("` (") 
-		     	.append(getSequenceOfParametersFields(record.getParameters()))
+		     	.append(record.getParameters().getQuerySequenceOfFields())
 		     .append(") VALUES (")
-             	.append(getSequenceOfParametersValues(record.getParameters()))
+             	.append(record.getParameters().getQuerySequenceOfValues())
              .append(");"); 
 
 		return query.toString();
-	}
-	
-	private String getSequenceOfParametersFields(CollectionParameters collectionParameters){
-		StringBuffer sequence = new StringBuffer();
-		for(Parameter parameter : collectionParameters){
-			if( collectionParameters.indexOf(parameter) != FIRST_INDEX )
-				sequence.append(",");
-			
-			sequence.append("`")
-			        .append(parameter.Field.Name)
-			        .append("`");
-		}
-		return sequence.toString();
-	}
-	
-	private String getSequenceOfParametersValues(CollectionParameters collectionParameters){
-		StringBuffer sequence = new StringBuffer();
-		for(Parameter parameter : collectionParameters){
-			if( collectionParameters.indexOf(parameter) != FIRST_INDEX )
-				sequence.append(",");
-			
-			if(parameter.Field.Type==FieldDataType.TEXT||parameter.Field.Type==FieldDataType.DATETIME)
-				sequence.append("'")
-				        .append(parameter.Value.replace("'", "''"))
-				        .append("'");
-			else
-				sequence.append(parameter.Value);
-		}
-		return sequence.toString();
 	}
 	
 	public  void   RecordUpdate(Record record, CollectionRecordsCondition conditions){
@@ -132,34 +102,13 @@ public class Table{
 		qeury.append("UPDATE `")
 		     .append(this.NameOfTable)
 		     .append("` SET ")
-			 .append(getSequenceOfFieldsSetValue(record.getParameters()))
+			 .append(record.getParameters().getQuerySequenceOfFieldsSetValue())
 		     .append(conditions.getQuerySequence());	
 
 	
 		return qeury.toString();
 	}
 	
-	private String getSequenceOfFieldsSetValue(List<Parameter> parameters) {
-		StringBuffer sequence = new StringBuffer();
-		for(Parameter parameter : parameters){
-			if( parameters.indexOf(parameter) != FIRST_INDEX )
-				sequence.append(", ");
-			
-			sequence.append("`")
-	        		.append(parameter.Field.Name) 
-	        		.append("` = ");
-			
-			if(parameter.Field.isNeedQuotes())
-				sequence.append("'")
-				        .append(parameter.Value.replace("'", "''")) 
-				        .append("'");
-			else
-				sequence.append(parameter.Value);
-		}
-		
-		return sequence.toString();
-	}
-
 	public  void   RecordDelete(CollectionRecordsCondition conditions){
 		Database.executeQuery(getQueryToDoRecordDelete(conditions));
 	}
