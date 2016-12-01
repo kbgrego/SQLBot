@@ -133,7 +133,7 @@ public class Table{
 	}
 	
 	public List<Record> Select(CollectionRecordsCondition conditions, int limit){
-		return Select(conditions, new ArrayList<TableSorting>(), limit);
+		return Select(conditions, new CollectionSorting(), limit);
 	}
 	
 	public List<Record> Select(CollectionRecordsCondition conditions, List<TableSorting> sorting, int limit){
@@ -166,13 +166,13 @@ public class Table{
 	
 
 	private String getQueryToDoSelect(CollectionRecordsCondition conditions, List<TableSorting> sorting, int limit){
-		StringBuffer qeury = new StringBuffer();
+		StringBuffer qeury = new StringBuffer();			
 		
 		qeury.append("SELECT * FROM `")
 		     .append(this.NameOfTable)
 		     .append("`")			
 			 .append(getSequenceOfConditions(conditions))			
-			 .append(getSequenceOfSorting(sorting))							
+			 .append(((CollectionSorting)sorting).getQuerySequence())							
 			 .append(getLimitParameter(limit));
 		
 		return qeury.toString();
@@ -183,21 +183,6 @@ public class Table{
 			return " LIMIT " + limit;
 		else
 			return "";
-	}
-	
-	private String getSequenceOfSorting(List<TableSorting> sorting){
-		
-		StringBuffer sequence = new StringBuffer();
-		
-		for(TableSorting sort : sorting)
-			if(sorting.indexOf(sort) == FIRST_INDEX)
-				sequence.append(" ORDER BY ")
-						.append(sort);
-			else
-				sequence.append(", ")
-				        .append(sort);
-		
-		return sequence.toString();
 	}
 	
 	private String getSequenceOfConditions(CollectionRecordsCondition conds){
