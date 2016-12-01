@@ -85,12 +85,41 @@ public class Table{
 		query.append("INSERT INTO `") 
 		     .append(this.NameOfTable)
 		     .append("` (") 
-		     	.append(record.getParameters().getQuerySequenceOfFields())
+		     	.append(getSequenceOfParametersFields(record.getParameters()))
 		     .append(") VALUES (")
-             	.append(record.getParameters().getQuerySequenceOfValues())
+             	.append(getSequenceOfParametersValues(record.getParameters()))
              .append(");"); 
 
 		return query.toString();
+	}
+	
+	private String getSequenceOfParametersFields(CollectionParameters collectionParameters){
+		StringBuffer sequence = new StringBuffer();
+		for(Parameter parameter : collectionParameters){
+			if( collectionParameters.indexOf(parameter) != FIRST_INDEX )
+				sequence.append(",");
+			
+			sequence.append("`")
+			        .append(parameter.Field.Name)
+			        .append("`");
+		}
+		return sequence.toString();
+	}
+	
+	private String getSequenceOfParametersValues(CollectionParameters collectionParameters){
+		StringBuffer sequence = new StringBuffer();
+		for(Parameter parameter : collectionParameters){
+			if( collectionParameters.indexOf(parameter) != FIRST_INDEX )
+				sequence.append(",");
+			
+			if(parameter.Field.Type==FieldDataType.TEXT||parameter.Field.Type==FieldDataType.DATETIME)
+				sequence.append("'")
+				        .append(parameter.Value.replace("'", "''"))
+				        .append("'");
+			else
+				sequence.append(parameter.Value);
+		}
+		return sequence.toString();
 	}
 	
 	public  void   RecordUpdate(Record record, CollectionRecordsCondition conditions){
@@ -103,10 +132,31 @@ public class Table{
 		qeury.append("UPDATE `")
 		     .append(this.NameOfTable)
 		     .append("` SET ")
-			 .append(record.getParameters().getQuerySequenceOfFieldsSetValue())
+			 .append(getSequenceOfFieldsSetValue(record.getParameters()))
 		     .append(getSequenceOfConditions(conditions));	
 	
 		return qeury.toString();
+	}
+	
+	private String getSequenceOfFieldsSetValue(List<Parameter> parameters) {
+		StringBuffer sequence = new StringBuffer();
+		for(Parameter parameter : parameters){
+			if( parameters.indexOf(parameter) != FIRST_INDEX )
+				sequence.append(", ");
+			
+			sequence.append("`")
+	        		.append(parameter.Field.Name) 
+	        		.append("` = ");
+			
+			if(parameter.Field.isNeedQuotes())
+				sequence.append("'")
+				        .append(parameter.Value.replace("'", "''")) 
+				        .append("'");
+			else
+				sequence.append(parameter.Value);
+		}
+		
+		return sequence.toString();
 	}
 
 	public  void   RecordDelete(CollectionRecordsCondition conditions){
