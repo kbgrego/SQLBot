@@ -6,6 +6,12 @@ import com.Otium.SQLBot.Record.Parameter;
 
 public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 	private static final long serialVersionUID = -2527722864096743032L;
+	
+	private CollectionRecordsConditionType type;
+	
+	public CollectionRecordsCondition() {
+		type = CollectionRecordsConditionType.AND;
+	}
 
 	public boolean add(RecordsCondition condition){
 		return super.add(condition);
@@ -24,5 +30,9 @@ public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 		
 	public boolean add(Field field, ConditionType type, Integer value){
 		return super.add(new RecordsCondition(field, type, value.toString()));
+	}
+
+	public CollectionRecordsConditionType getType() {
+		return type;
 	}
 }

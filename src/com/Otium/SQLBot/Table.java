@@ -256,7 +256,7 @@ public class Table{
 		
 		for(RecordsCondition condition : conds){
 			if(flag)
-				sb.append(" and ");
+				sb.append(" ").append(conds.getType().toString()).append(" ");
 			else
 				sb.append(" where ");
 			sb.append(condition);
