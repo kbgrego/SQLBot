@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.Otium.SQLBot.Field.FIELD;
-import com.Otium.SQLBot.Record.Parameter;
 import com.Otium.SQLBot.Table.TABLE;
 
 public class TableFactory<T extends TableObject> {
@@ -45,38 +44,8 @@ public class TableFactory<T extends TableObject> {
 	}
 	
 	public List<T> getList(){
-		List<T> list = new ArrayList<T>();
-		Class<?>[] args = new Class[]{String.class};
-		
-		List<Record> data = Table.Select();
-		
-		for(Record row : data){
-			try {
-				T obj = MainClass.getConstructor(this.getClass()).newInstance(this);
-				obj.setFactory(this);
-				list.add(obj);
-				for(Parameter param : row.getParameters()){
-					try {
-						String seterName = "set" + getCapitalize(param.Field.Name.toString());
-						Method seter = MainClass.getMethod(seterName, args);
-						seter.invoke(obj, param.Value);
-					} catch (Exception e){
-						if( Connection.isDEBUG() )
-							System.err.println(e.getClass().getName() + ": " + e.getMessage());
-					}
-				}
-		        obj.setListners();
-			} catch (Exception e) {
-				if( Connection.isDEBUG() )
-					System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			}
-		}
-		
-		return list;
-	}
-
-	private String getCapitalize(String string) {		 
-		return string.toUpperCase().substring(0,1) + string.substring(1);
+		TableSelector<T> selector = new TableSelector<>(this);
+		return selector.getList();
 	}
 
 	protected void Create(TableObject tableObject) {
@@ -120,7 +89,11 @@ public class TableFactory<T extends TableObject> {
 		}			
 	}
 	
-	private Record getObjectRecord(TableObject tableObject) {
+	private String getCapitalize(String string) {		 
+		return string.toUpperCase().substring(0,1) + string.substring(1);
+	}
+	
+	protected Record getObjectRecord(TableObject tableObject) {
 		Record record = new Record();
 		for(Field field:Table.FieldsOfTable){
 			if(field.Name == RID_FIELD) continue;
@@ -128,7 +101,9 @@ public class TableFactory<T extends TableObject> {
 				String geterName = "get" + getCapitalize(field.Name.toString());
 				Method seter = MainClass.getMethod(geterName);
 				Object value = seter.invoke(tableObject);
-				if(value instanceof TableObject)
+				if(value == null)
+					continue;
+				else if(value instanceof TableObject)
 					record.addParameter(field, ((TableObject)value).getRid() );
 				else
 					record.addParameter(field, value.toString());
@@ -138,5 +113,16 @@ public class TableFactory<T extends TableObject> {
 		}
 		return record;
 	}
+	
+	protected Table getTable(){
+		return Table;
+	}
+	
+	protected Class<T> getMainClass(){
+		return MainClass;
+	}
 
+	protected ConnectDatabase getConnection(){
+		return Connection;
+	}
 }
