@@ -11,7 +11,7 @@ import com.Otium.SQLBot.Field.FIELD;
 import com.Otium.SQLBot.Table.TABLE;
 
 public class TableFactory<T extends TableObject> {
-	protected FIELD RID_FIELD = new FIELD("rid");
+	protected static FIELD RID_FIELD = new FIELD("rid");
 	
 	private ConnectDatabase Connection;
 	private TABLE nameTable;
