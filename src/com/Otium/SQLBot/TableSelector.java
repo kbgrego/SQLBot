@@ -56,7 +56,7 @@ public class TableSelector<T extends TableObject> {
 	}
 
 	private CollectionRecordsCondition getConditions() {
-		CollectionRecordsCondition conditions = new CollectionRecordsCondition(CollectionRecordsConditionType.OR);	
+		CollectionRecordsCondition conditions = new CollectionRecordsCondition(CollectionRecordsConditionType.AND);	
 		for(T pattern : patterns)
 			conditions.add(factory.getObjectRecord(pattern));
 		return conditions;
