@@ -20,9 +20,9 @@ public class Record{
 		throw new FieldNotFoundException(); 
 	}
 	
-	public void addParameter(Field field, Object value){
+	public void addParameter(Field field, SQLData value){
 		if(value!=null)
-			Parameters.add(field, value.toString());
+			Parameters.add(field, value);
 	}
 	
 	public CollectionParameters getParameters(){
@@ -59,12 +59,27 @@ public class Record{
 	public static class Parameter{
 		
 		public Field Field;
-		public String Value;
+		public SQLData Value;
 		
-		public Parameter(Field field, String value){				
+		public Parameter(Field field, SQLData value){				
 			this.Field = field;
 			this.Value = value;
 		}
 		
+	}
+
+	protected void addParameter(Field field, Object object) {
+		if (object instanceof Integer)
+			addParameter(field, new SQLInteger((Integer) object));
+		else if (object instanceof byte[])
+			addParameter(field, new SQLBlob((byte[]) object));
+		else if (object instanceof SQLData)
+			addParameter(field, (SQLData) object);
+		else {
+			if(object.toString().matches("(\\d{4})-(\\d{2})-(\\d{2})\\s(\\d{2})\\:(\\d{2})\\:(\\d{2})"))
+				addParameter(field, new SQLDateTime(object.toString()));
+			else
+				addParameter(field, new SQLText(object.toString()));			
+		}
 	}
 }

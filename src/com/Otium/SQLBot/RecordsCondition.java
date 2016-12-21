@@ -3,11 +3,11 @@ package com.Otium.SQLBot;
 public class RecordsCondition {
 	public Field field;
 	public ConditionType condType;
-	public String cond;
+	public SQLData cond;
 	
 	RecordsCondition() {}
 	
-	public RecordsCondition(Field field, ConditionType conditionType, String condition){
+	public RecordsCondition(Field field, ConditionType conditionType, SQLData condition){
 		this.field    = field;
 		this.condType = conditionType;
 		this.cond     = condition;
@@ -20,14 +20,8 @@ public class RecordsCondition {
 		buffer.append("`")
 		      .append(field.Name)
 		      .append("`")
-		      .append(condType);
-		
-		if(field.isNeedQuotes())
-			buffer.append("'")
-			      .append(cond.replace("'", "''"))
-			      .append("'");
-		else
-			buffer.append(cond);
+		      .append(condType)		
+		      .append(cond.getQueryValue());
 		
 		return buffer.toString();
 	}

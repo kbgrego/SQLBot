@@ -24,7 +24,7 @@ public class Field{
 	}
 	
 	public boolean isNeedQuotes(){
-		return this.Type==FieldDataType.TEXT  ||  this.Type==FieldDataType.DATETIME;
+		return this.Type==FieldDataType.TEXT  ||  this.Type==FieldDataType.DATETIME || this.Type==FieldDataType.BLOB;
 	}
 	
 	@Override

@@ -12,7 +12,7 @@ public class CollectionParameters extends ArrayList<Parameter> {
 		return super.add(parameter);		
 	}
 		
-	public boolean add(Field field, String value){
+	public boolean add(Field field, SQLData value){
 		Parameter param = new Parameter(field, value);
 		return super.add(param);		
 	}
@@ -35,13 +35,8 @@ public class CollectionParameters extends ArrayList<Parameter> {
 		for(Parameter parameter : this){
 			if( indexOf(parameter) != FIRST_INDEX )
 				sequence.append(",");
-			
-			if(parameter.Field.Type==FieldDataType.TEXT||parameter.Field.Type==FieldDataType.DATETIME)
-				sequence.append("'")
-				        .append(parameter.Value.replace("'", "''"))
-				        .append("'");
-			else
-				sequence.append(parameter.Value);
+		
+			sequence.append(parameter.Value.getQueryValue());
 		}
 		return sequence.toString();
 	}
@@ -56,12 +51,7 @@ public class CollectionParameters extends ArrayList<Parameter> {
 	        		.append(parameter.Field.Name) 
 	        		.append("` = ");
 			
-			if(parameter.Field.isNeedQuotes())
-				sequence.append("'")
-				        .append(parameter.Value.replace("'", "''")) 
-				        .append("'");
-			else
-				sequence.append(parameter.Value);
+			sequence.append(parameter.Value.getQueryValue());
 		}
 		
 		return sequence.toString();

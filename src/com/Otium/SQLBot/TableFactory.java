@@ -3,8 +3,8 @@
  */
 package com.Otium.SQLBot;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.Otium.SQLBot.Field.FIELD;
@@ -40,7 +40,13 @@ public class TableFactory<T extends TableObject> {
 				
 		for(java.lang.reflect.Field field : MainClass.getDeclaredFields())
 			if(!field.isAnnotationPresent(SQLBotIgnore.class) )
-				Table.FieldsOfTable.add(new FIELD(field.getName()), FieldDataType.TEXT, Key.NONE, Increment.NOAUTO);
+				try {
+					Table.FieldsOfTable.add(new FIELD(field.getName()),(FieldDataType) field.getType().getMethod("getSQLDataType").invoke(field.getType().newInstance()), Key.NONE, Increment.NOAUTO);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+						| NoSuchMethodException | SecurityException | InstantiationException e) {
+					if(Connection.isDEBUG())
+						e.printStackTrace();
+				}
 	}
 	
 	public List<T> getList(){
@@ -54,16 +60,16 @@ public class TableFactory<T extends TableObject> {
 		tableObject.setRid(getLastCreatedIndex(tableObject));			
 	}
 	
-	private String getLastCreatedIndex(TableObject tableObject){
+	private SQLInteger getLastCreatedIndex(TableObject tableObject){
 		try {
 			CollectionRecordsCondition conditions = new CollectionRecordsCondition();
-			List<TableSorting> sorting = new ArrayList<TableSorting>();
+			CollectionSorting sorting = new CollectionSorting();
 			Record record = getObjectRecord(tableObject);
 			conditions.add(record);							
 			sorting.add(new TableSorting(Table.getFieldByName(RID_FIELD), SortType.ASC));					
-			return Table.Select(conditions, sorting , 1).get(0).getParameterByField(Table.getFieldByName(RID_FIELD)).Value;
+			return (SQLInteger)Table.Select(conditions, sorting , 1).get(0).getParameterByField(Table.getFieldByName(RID_FIELD)).Value;
 		} catch (FieldNotFoundException e) {
-			return "0";
+			return new SQLInteger(0);
 		} 
 	}
 	
@@ -100,12 +106,17 @@ public class TableFactory<T extends TableObject> {
 				String geterName = "get" + getCapitalize(field.Name.toString());
 				Method seter = MainClass.getMethod(geterName);
 				Object value = seter.invoke(tableObject);
-				if(value == null || (field.Name == RID_FIELD && value.equals("0")))
+				if(value == null || (field.Name == RID_FIELD && ((SQLInteger)value).get()==0))
 					continue;
-				else if(value instanceof TableObject)
-					record.addParameter(field, ((TableObject)value).getRid() );
+				else if(value instanceof TableObject){
+					if (((TableObject)value).getRid().get() == 0) 
+						((TableObject)value).Save();
+					record.addParameter(field, ( (TableObject)value).getRid() );
+				}
+				else if(value instanceof SQLData)
+					record.addParameter(field, value);
 				else
-					record.addParameter(field, value.toString());
+					throw new NotSQLDataException(field.Name.toString());
 			} catch (Exception e){
 				//silence is golden
 			}
@@ -123,5 +134,12 @@ public class TableFactory<T extends TableObject> {
 
 	protected ConnectDatabase getConnection(){
 		return Connection;
+	}
+	
+	protected T getInstance()
+			throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		T instance = MainClass.getConstructor().newInstance();
+		MainClass.getMethod("setFactory", new Class[]{TableFactory.class}).invoke(instance, this);
+		return instance;
 	}
 }

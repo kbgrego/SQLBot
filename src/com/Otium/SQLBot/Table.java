@@ -136,16 +136,18 @@ public class Table{
 		return Select(conditions, new CollectionSorting(), limit);
 	}
 	
-	public List<Record> Select(CollectionRecordsCondition conditions, List<TableSorting> sorting, int limit){
+	public List<Record> Select(CollectionRecordsCondition conditions, CollectionSorting sorting, int limit){
 		try{
 			return selectWithThrows(conditions, sorting, limit);
 		} catch (Exception e) {
+			if(Database.isDEBUG())
+				e.printStackTrace();
 			return new ArrayList<Record>();
 		}
 	}
 	
 	@SuppressWarnings("unused")
-	private List<Record> selectWithThrows(CollectionRecordsCondition conditions, List<TableSorting> sorting, int limit) throws SQLException{
+	private List<Record> selectWithThrows(CollectionRecordsCondition conditions, CollectionSorting sorting, int limit) throws SQLException{
 		List<Record> records = new ArrayList<Record>();		
 		
 		ResultSet resultSet = Database.executeQuery(getQueryToDoSelect(conditions, sorting, limit));
@@ -157,7 +159,7 @@ public class Table{
 	    while(resultSet.next()) {
 	        Record record = new Record();
 	        for(int i=1; i <= resultSetMetaData.getColumnCount(); i++)
-	        	record.addParameter(FieldsOfTable.get(i-1), resultSet.getString(i));
+	        	record.addParameter(FieldsOfTable.get(i-1), resultSet.getObject(i));
 	        records.add(record);
 	    }	
 	    
@@ -165,14 +167,14 @@ public class Table{
 	}
 	
 
-	private String getQueryToDoSelect(CollectionRecordsCondition conditions, List<TableSorting> sorting, int limit){
+	private String getQueryToDoSelect(CollectionRecordsCondition conditions, CollectionSorting sorting, int limit){
 		StringBuffer qeury = new StringBuffer();			
 		
 		qeury.append("SELECT * FROM `")
 		     .append(this.NameOfTable)
 		     .append("`")			
 			 .append(conditions.getQuerySequence())			
-			 .append(((CollectionSorting)sorting).getQuerySequence())							
+			 .append(sorting.getQuerySequence())							
 			 .append(getLimitParameter(limit));
 		
 		return qeury.toString();

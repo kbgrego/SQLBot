@@ -29,12 +29,8 @@ public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 		return true;
 	}
 	
-	public boolean add(Field field, ConditionType type, String value){
+	public boolean add(Field field, ConditionType type, SQLData value){
 		return super.add(new RecordsCondition(field, type, value));
-	}
-		
-	public boolean add(Field field, ConditionType type, Integer value){
-		return super.add(new RecordsCondition(field, type, value.toString()));
 	}
 
 	public CollectionRecordsConditionType setType() {

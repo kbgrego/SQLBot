@@ -12,5 +12,6 @@ public enum FieldDataType {
 	INTEGER,
 	TEXT,
 	DATETIME, 
-	REAL
+	REAL,
+	BLOB
 }

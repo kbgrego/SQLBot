@@ -4,17 +4,13 @@
 
 package com.Otium.SQLBot;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.Otium.SQLBot.Record.Parameter;
 
 public class TableSelector<T extends TableObject> {
-	private static final Class<?>[] ARGS_INTEGER = new Class[]{Integer.class};
-	private static final Class<?>[] ARGS_STRING = new Class[]{String.class};
 	private TableFactory<T> factory;
 	private List<T> patterns;	
 	
@@ -38,7 +34,7 @@ public class TableSelector<T extends TableObject> {
 		
 		for(Record row : data){
 			try {
-				T obj = getInstance();
+				T obj = factory.getInstance();
 				obj.setFactory(factory);
 				list.add(obj);
 				for(Parameter param : row.getParameters())
@@ -53,11 +49,6 @@ public class TableSelector<T extends TableObject> {
 		return list;
 	}
 
-	private T getInstance()
-			throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		return factory.getMainClass().getConstructor(factory.getClass()).newInstance(factory);
-	}
-
 	private CollectionRecordsCondition getConditions() {
 		CollectionRecordsCondition conditions = new CollectionRecordsCondition(CollectionRecordsConditionType.AND);	
 		for(T pattern : patterns)
@@ -70,14 +61,32 @@ public class TableSelector<T extends TableObject> {
 			String geterName = "get" + getCapitalize(param.Field.Name.toString());
 			String seterName = "set" + getCapitalize(param.Field.Name.toString());
 			
-			if(factory.getMainClass().getMethod(geterName).invoke(obj) instanceof TableObject)
-			    factory.getMainClass().getMethod(seterName, ARGS_INTEGER).invoke(obj, Integer.parseInt(param.Value));
-			else 
-				factory.getMainClass().getMethod(seterName, ARGS_STRING).invoke(obj, param.Value);
+			Class<?> object_class = factory.getMainClass().getField(param.Field.Name.toString()).getType();
+			Object object = factory.getMainClass().getMethod(geterName).invoke(obj);
+			if(object_class.getSuperclass()==TableObject.class){
+				factory.getMainClass().getMethod(seterName, new Class[]{object_class}).invoke(obj,tryGetTableObject(param, obj, seterName, object_class));
+			} else { 
+				factory.getMainClass().getMethod(seterName, new Class[]{param.Value.getClass()}).invoke(obj, param.Value);
+			}
 		} catch (Exception e){
 			if( factory.getConnection().isDEBUG() )
 				System.err.println(e.getClass().getName() + ": " + e.getMessage());
 		}
+	}
+
+	private TableObject tryGetTableObject(Parameter param, T obj, String seterName, Class<?> object_class)
+			throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException,
+			TableObjectNotFoundException {
+		TableFactory object_factory = (TableFactory) object_class.getMethod("getTableFactory").invoke(object_class.newInstance());
+		TableSelector selector = new TableSelector(object_factory);
+		TableObject instance = (TableObject)factory.getInstance();
+		instance.setRid((SQLInteger)param.Value);
+		selector.addPattern(instance);
+		List result = selector.getList(1); 
+		if(!result.isEmpty())					
+			return (TableObject) result.get(0);
+		else
+			throw new TableObjectNotFoundException(factory.getTable().NameOfTable, ((SQLInteger)param.Value).get());
 	}
 	
 	private String getCapitalize(String string) {		 
