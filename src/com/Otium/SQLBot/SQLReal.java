@@ -2,7 +2,7 @@ package com.Otium.SQLBot;
 
 import javafx.beans.property.SimpleDoubleProperty;
 
-public class SQLReal extends SimpleDoubleProperty implements SQLData {
+public class SQLReal extends SimpleDoubleProperty implements SQLData, Comparable<SQLReal>{
 
 	@Override
 	public FieldDataType getSQLDataType() {
@@ -14,4 +14,12 @@ public class SQLReal extends SimpleDoubleProperty implements SQLData {
 		return Double.toString(get());
 	}
 
+	public String toString(){
+		return Double.toString(get());
+	}
+
+	@Override
+	public int compareTo(SQLReal o) {
+		return Double.compare(get(), o.get());
+	}
 }

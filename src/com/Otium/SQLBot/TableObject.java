@@ -20,7 +20,7 @@ public abstract class TableObject {
 		return string.toUpperCase().substring(0,1) + string.substring(1);
 	}
 
-	@SQLBotIgnore private TableFactory<?> Factory;
+	@SQLBotIgnore private TableFactory<? extends TableObject> Factory;
 	
 	@SQLBotIgnore public SQLInteger rid; 
 	
@@ -28,7 +28,7 @@ public abstract class TableObject {
 		rid = new SQLInteger(0);
 	}
 	
-	protected TableObject(TableFactory<?> table){
+	protected TableObject(TableFactory<? extends TableObject> table){
 		this();
 		setFactory(table);
 	}
@@ -36,7 +36,7 @@ public abstract class TableObject {
 	public abstract void setListners();
 
 	@SQLBotIgnore 
-	public void setFactory(TableFactory<?> table){
+	public void setFactory(TableFactory<? extends TableObject> table){
 		this.Factory = table;		
 	}
 	
@@ -86,7 +86,38 @@ public abstract class TableObject {
 		rid.set(lastCreatedIndex.get());
 	}
 
-	public TableFactory<?> getTableFactory() {
+	public TableFactory<? extends TableObject> getTableFactory() {
 		return Factory;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((Factory == null) ? 0 : Factory.hashCode());
+		result = prime * result + ((rid == null) ? 0 : Integer.hashCode(rid.get()));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TableObject other = (TableObject) obj;
+		if (Factory == null) {
+			if (other.Factory != null)
+				return false;
+		} else if (!Factory.equals(other.Factory))
+			return false;
+		if (rid == null) {
+			if (other.rid != null)
+				return false;
+		} else if (rid.get() != other.rid.get())
+			return false;
+		return true;
 	}
 }

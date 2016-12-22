@@ -3,11 +3,11 @@ package com.Otium.SQLBot;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class SQLTableObject<T extends TableObject> extends SimpleObjectProperty<T> implements SQLData{	
-	protected SQLTableObject(){
+	public SQLTableObject(){
 		
 	}
 	
-	protected SQLTableObject(T object){
+	public SQLTableObject(T object){
 		this.setValue(object);
 	}
 	
@@ -19,5 +19,9 @@ public class SQLTableObject<T extends TableObject> extends SimpleObjectProperty<
 	@Override
 	public String getQueryValue() {		
 		return get()==null ? "0" : get().getRid().getQueryValue();
+	}
+	
+	public String toString(){
+		return get().toString();
 	}
 }

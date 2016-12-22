@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 import javafx.beans.property.SimpleObjectProperty;
 
-public class SQLDateTime extends SimpleObjectProperty<LocalDateTime> implements SQLData{
+public class SQLDateTime extends SimpleObjectProperty<LocalDateTime> implements SQLData, Comparable<SQLDateTime>{
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	
 	protected SQLDateTime(){
@@ -28,5 +28,14 @@ public class SQLDateTime extends SimpleObjectProperty<LocalDateTime> implements 
 	@Override
 	public String getQueryValue() {
 		return "'" + get().format(formatter) + "'";
+	}
+	
+	public String toString(){
+		return get().format(formatter);
+	}
+
+	@Override
+	public int compareTo(SQLDateTime o) {
+		return get().compareTo(o.get());
 	}
 }

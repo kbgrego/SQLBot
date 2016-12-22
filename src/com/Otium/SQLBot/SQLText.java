@@ -2,7 +2,7 @@ package com.Otium.SQLBot;
 
 import javafx.beans.property.SimpleStringProperty;
 
-public class SQLText extends SimpleStringProperty implements SQLData{
+public class SQLText extends SimpleStringProperty implements SQLData, Comparable<SQLText>{
 
 	protected SQLText(){
 		this("");
@@ -22,4 +22,12 @@ public class SQLText extends SimpleStringProperty implements SQLData{
 		return "'" + get().replace("'", "''") + "'";
 	}
 	
+	public String toString(){
+		return get();
+	}
+
+	@Override
+	public int compareTo(SQLText o) {
+		return get().compareTo(o.get());
+	}
 }

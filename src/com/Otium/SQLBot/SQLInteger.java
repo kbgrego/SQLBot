@@ -2,7 +2,7 @@ package com.Otium.SQLBot;
 
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class SQLInteger extends SimpleIntegerProperty implements SQLData{
+public class SQLInteger extends SimpleIntegerProperty implements SQLData, Comparable<SQLInteger>{
 
 	protected SQLInteger(){
 		this.add(0);
@@ -21,5 +21,14 @@ public class SQLInteger extends SimpleIntegerProperty implements SQLData{
 	public String getQueryValue() {
 		return Integer.toString(this.get());
 	}
+	
+	public String toString(){
+		return Integer.toString(get());
+	}
 
+	@Override
+	public int compareTo(SQLInteger o) {
+		return Integer.compare(get(), o.get());
+	}
+	
 }
