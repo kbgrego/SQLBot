@@ -39,9 +39,10 @@ public class TableFactory<T extends TableObject> {
 		Table.FieldsOfTable.add(RID_FIELD, FieldDataType.INTEGER, Key.PRIMARY, Increment.AUTO);
 				
 		for(java.lang.reflect.Field field : MainClass.getDeclaredFields())
-			if(!field.isAnnotationPresent(SQLBotIgnore.class) )
+			if(!field.isAnnotationPresent(SQLBotIgnore.class) && SQLData.class.isAssignableFrom(field.getType()) )
 				try {
-					Table.FieldsOfTable.add(new FIELD(field.getName()),(FieldDataType) field.getType().getMethod("getSQLDataType").invoke(field.getType().newInstance()), Key.NONE, Increment.NOAUTO);
+					FieldDataType type = (FieldDataType) field.getType().getMethod("getSQLDataType").invoke(field.getType().newInstance());
+					Table.FieldsOfTable.add(new FIELD(field.getName()), type, Key.NONE, Increment.NOAUTO);
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 						| NoSuchMethodException | SecurityException | InstantiationException e) {
 					if(Connection.isDEBUG())
@@ -95,24 +96,16 @@ public class TableFactory<T extends TableObject> {
 		}			
 	}
 	
-	private String getCapitalize(String string) {		 
-		return string.toUpperCase().substring(0,1) + string.substring(1);
-	}
+
 	
 	protected Record getObjectRecord(TableObject tableObject) {
 		Record record = new Record();
 		for(Field field:Table.FieldsOfTable){			
 			try {
-				String geterName = "get" + getCapitalize(field.Name.toString());
-				Method seter = MainClass.getMethod(geterName);
-				Object value = seter.invoke(tableObject);
+				Method geter = MainClass.getMethod(TableObject.getGetterName(field.Name.toString()));
+				Object value = geter.invoke(tableObject);
 				if(value == null || (field.Name == RID_FIELD && ((SQLInteger)value).get()==0))
 					continue;
-				else if(value instanceof TableObject){
-					if (((TableObject)value).getRid().get() == 0) 
-						((TableObject)value).Save();
-					record.addParameter(field, ( (TableObject)value).getRid() );
-				}
 				else if(value instanceof SQLData)
 					record.addParameter(field, value);
 				else

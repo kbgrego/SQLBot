@@ -1,10 +1,25 @@
 package com.Otium.SQLBot;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 /**
  * Copyright 2016 Kabanov Gregory 
  */
 
-public abstract class TableObject implements SQLData {
+public abstract class TableObject {
+	public static String getGetterName(String field_name) {
+		return  "get" + getCapitalize(field_name);
+	}
+
+	public static String getSetterName(String field_name) {
+		return  "set" + getCapitalize(field_name);
+	}
+
+	private static String getCapitalize(String string) {		 
+		return string.toUpperCase().substring(0,1) + string.substring(1);
+	}
+
 	@SQLBotIgnore private TableFactory<?> Factory;
 	
 	@SQLBotIgnore public SQLInteger rid; 
@@ -27,6 +42,22 @@ public abstract class TableObject implements SQLData {
 	
 	@SQLBotIgnore
 	public void Save(){
+		TableObject object;
+		for(Field field : Factory.getTable().FieldsOfTable){
+			try {
+				Method geter = getClass().getMethod(getGetterName(field.Name.toString()));
+				Object value = geter.invoke(this);
+				if(value != null && 
+						   value instanceof SQLTableObject && 
+						   (object=((SQLTableObject<? extends TableObject>)value).get())!=null &&
+						   !object.isHasRid()) 
+							object.Save();
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				if(Factory.getConnection().isDEBUG())
+					e.printStackTrace();
+			}
+		}
+			
 		if(isHasRid())
 			Factory.Update(this);
 		else
@@ -57,15 +88,5 @@ public abstract class TableObject implements SQLData {
 
 	public TableFactory<?> getTableFactory() {
 		return Factory;
-	}
-	
-	@Override
-	public final FieldDataType getSQLDataType(){
-		return FieldDataType.INTEGER;
-	}
-	
-	@Override
-	public String getQueryValue() {
-		return rid.getQueryValue();
 	}
 }

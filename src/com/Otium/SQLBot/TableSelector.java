@@ -5,6 +5,7 @@
 package com.Otium.SQLBot;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,13 +59,14 @@ public class TableSelector<T extends TableObject> {
 
 	private void setParam(Parameter param, T obj) {
 		try {
-			String geterName = "get" + getCapitalize(param.Field.Name.toString());
-			String seterName = "set" + getCapitalize(param.Field.Name.toString());
-			
-			Class<?> object_class = factory.getMainClass().getField(param.Field.Name.toString()).getType();
-			Object object = factory.getMainClass().getMethod(geterName).invoke(obj);
-			if(object_class.getSuperclass()==TableObject.class){
-				factory.getMainClass().getMethod(seterName, new Class[]{object_class}).invoke(obj,tryGetTableObject(param, obj, seterName, object_class));
+			String seterName = TableObject.getSetterName(param.Field.Name.toString());
+			Class<?> object_class=null;
+			Object paramType;
+			if((paramType=factory.getMainClass().getField(param.Field.Name.toString()).getGenericType()) instanceof ParameterizedType)
+				object_class = (Class<?>) ((ParameterizedType)paramType).getActualTypeArguments()[0];
+			if(object_class!=null && TableObject.class.isAssignableFrom(object_class)){
+				factory.getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
+				                         .invoke(obj, new SQLTableObject(tryGetTableObject(param, obj, seterName, object_class)));
 			} else { 
 				factory.getMainClass().getMethod(seterName, new Class[]{param.Value.getClass()}).invoke(obj, param.Value);
 			}
@@ -87,9 +89,5 @@ public class TableSelector<T extends TableObject> {
 			return (TableObject) result.get(0);
 		else
 			throw new TableObjectNotFoundException(factory.getTable().NameOfTable, ((SQLInteger)param.Value).get());
-	}
-	
-	private String getCapitalize(String string) {		 
-		return string.toUpperCase().substring(0,1) + string.substring(1);
 	}
 }

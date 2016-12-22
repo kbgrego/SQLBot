@@ -3,6 +3,8 @@
  */
 package com.Otium.SQLBot;
 
+import java.time.LocalDateTime;
+
 /**
  * Class to manage records in table.
  */
@@ -69,7 +71,15 @@ public class Record{
 	}
 
 	protected void addParameter(Field field, Object object) {
-		if (object instanceof Integer)
+		if (object == null)
+			switch (field.Type) {
+				case INTEGER:  addParameter(field, new SQLInteger((Integer) object));break;
+				case BLOB:     addParameter(field, new SQLBlob());break;
+				case DATETIME: addParameter(field, new SQLDateTime((LocalDateTime) null));break;
+				case REAL:     addParameter(field, new SQLReal());break;
+				case TEXT:     addParameter(field, new SQLText(null));break;
+			}
+		else if (object instanceof Integer)
 			addParameter(field, new SQLInteger((Integer) object));
 		else if (object instanceof byte[])
 			addParameter(field, new SQLBlob((byte[]) object));
