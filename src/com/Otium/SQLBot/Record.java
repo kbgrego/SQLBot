@@ -85,11 +85,13 @@ public class Record{
 			addParameter(field, new SQLBlob((byte[]) object));
 		else if (object instanceof SQLData)
 			addParameter(field, (SQLData) object);
-		else {
-			if(object.toString().matches("(\\d{4})-(\\d{2})-(\\d{2})\\s(\\d{2})\\:(\\d{2})\\:(\\d{2})"))
+		else if (field.Type == FieldDataType.DATETIME){
+			if(object.toString().matches("(\\d{4})-(\\d{2})-(\\d{2})(\\s(\\d{2})\\:(\\d{2})\\:(\\d{2}))*"))
 				addParameter(field, new SQLDateTime(object.toString()));
 			else
-				addParameter(field, new SQLText(object.toString()));			
+				addParameter(field, new SQLDateTime((LocalDateTime) null));
 		}
+		else
+			addParameter(field, new SQLText(object.toString()));			
 	}
 }

@@ -7,13 +7,17 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class SQLDateTime extends SimpleObjectProperty<LocalDateTime> implements SQLData, Comparable<SQLDateTime>{
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private static final DateTimeFormatter short_formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	
 	protected SQLDateTime(){
 		this.setValue(LocalDateTime.MIN);
 	}
 	
 	protected SQLDateTime(String datetime){
-		this.setValue(LocalDateTime.parse(datetime, formatter));
+		if(datetime.matches("(\\d{4})-(\\d{2})-(\\d{2})\\s(\\d{2})\\:(\\d{2})\\:(\\d{2})"))
+			this.setValue(LocalDateTime.parse(datetime, formatter));
+		else
+			this.setValue(LocalDateTime.parse(datetime + " 00:00:00", formatter));
 	}
 	
 	public SQLDateTime(LocalDateTime datetime) {
@@ -27,7 +31,10 @@ public class SQLDateTime extends SimpleObjectProperty<LocalDateTime> implements 
 
 	@Override
 	public String getQueryValue() {
-		return "'" + get().format(formatter) + "'";
+		if(get()!=null)
+			return "'" + get().format(formatter) + "'";
+		else
+			return "''";
 	}
 	
 	public String toString(){
