@@ -62,7 +62,7 @@ public class TableSelector<T extends TableObject> {
 			String seterName = TableObject.getSetterName(param.Field.Name.toString());
 			Class<?> object_class=null;
 			Object paramType;
-			if((paramType=factory.getMainClass().getField(param.Field.Name.toString()).getGenericType()) instanceof ParameterizedType)
+			if((param.Field.Name!=TableFactory.RID_FIELD) && ((paramType=factory.getMainClass().getDeclaredField(param.Field.Name.toString()).getGenericType()) instanceof ParameterizedType))
 				object_class = (Class<?>) ((ParameterizedType)paramType).getActualTypeArguments()[0];
 			if(object_class!=null && TableObject.class.isAssignableFrom(object_class)){
 				factory.getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
