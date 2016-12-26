@@ -81,7 +81,7 @@ public class Table{
 	private String getQueryToDoRecordInsert(Record record){
 		StringBuffer query  = new StringBuffer();
 		
-		query.append("INSERT INTO `") 
+		query.append("INSERT OR IGNORE INTO `") 
 		     .append(this.NameOfTable)
 		     .append("` (") 
 		     	.append(record.getParameters().getQuerySequenceOfFields())
