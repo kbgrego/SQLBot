@@ -19,7 +19,10 @@ public class SQLText extends SimpleStringProperty implements SQLData, Comparable
 
 	@Override
 	public String getQueryValue() {
-		return "'" + get().replace("'", "''") + "'";
+		if(get()==null)
+			return "''";
+		else
+			return "'" + get().replace("'", "''") + "'";
 	}
 	
 	public String toString(){
