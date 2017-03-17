@@ -38,7 +38,7 @@ public class TableFactory<T extends TableObject> {
 	private void initialFields() {
 		Table.FieldsOfTable.add(RID_FIELD, FieldDataType.INTEGER, Key.PRIMARY, Increment.AUTO);
 				
-		for(java.lang.reflect.Field field : MainClass.getDeclaredFields())
+		for(java.lang.reflect.Field field : MainClass.getFields())
 			if(!field.isAnnotationPresent(SQLBotIgnore.class) && SQLData.class.isAssignableFrom(field.getType()) )
 				try {
 					FieldDataType type = (FieldDataType) field.getType().getMethod("getSQLDataType").invoke(field.getType().newInstance());
@@ -55,7 +55,7 @@ public class TableFactory<T extends TableObject> {
 		return selector.getList();
 	}
 
-	protected void Create(TableObject tableObject) {
+	public void Create(TableObject tableObject) {
 		if(!tableObject.isHasRid())	
 			Table.RecordInsert(getObjectRecord(tableObject));
 		tableObject.setRid(getLastCreatedIndex(tableObject));			
