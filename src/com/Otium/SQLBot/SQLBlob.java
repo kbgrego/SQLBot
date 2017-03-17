@@ -4,18 +4,17 @@ import java.util.ArrayList;
 
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class SQLBlob extends SimpleListProperty<Byte> implements SQLData {
 		
 	public SQLBlob(byte[] array) {
-		this(FXCollections.observableList(new ArrayList<Byte>()));
-		for(byte b : array)
-			add(b);
+		this();
+		set(array);
 	}
-	
-	private SQLBlob(ObservableList<Byte> set){
-		super(set);
+		
+	public void set(byte[] array){
+		for(byte b : array)
+			add(b);		
 	}
 
 	public SQLBlob() {
