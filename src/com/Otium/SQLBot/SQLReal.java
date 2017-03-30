@@ -4,6 +4,15 @@ import javafx.beans.property.SimpleDoubleProperty;
 
 public class SQLReal extends SimpleDoubleProperty implements SQLData, Comparable<SQLReal>{
 
+	public SQLReal() {
+		super();
+	}
+
+	public SQLReal(double parseDouble) {
+		super();
+		set(parseDouble);
+	}
+
 	@Override
 	public FieldDataType getSQLDataType() {
 		return FieldDataType.REAL;
