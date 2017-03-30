@@ -22,7 +22,8 @@ public abstract class TableObject {
 
 	@SQLBotIgnore private TableFactory<? extends TableObject> Factory;
 	
-	@SQLBotIgnore private SQLInteger rid; 
+	@SQLBotIgnore
+	protected SQLInteger rid; 
 	
 	private TableObject(){
 		rid = new SQLInteger(0);
