@@ -37,10 +37,10 @@ public class TableSelector<T extends TableObject> {
 			try {
 				T obj = factory.getInstance();
 				obj.setFactory(factory);
-				list.add(obj);
 				for(Parameter param : row.getParameters())
 					setParam(param, obj);
 		        obj.setListners();
+				list.add(obj);
 			} catch (Exception e) {
 				if( factory.getConnection().isDEBUG() )
 					System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -57,7 +57,7 @@ public class TableSelector<T extends TableObject> {
 		return conditions;
 	}
 
-	private void setParam(Parameter param, T obj) {
+	private void setParam(Parameter param, T obj) throws TableObjectNotFoundException {
 		try {
 			String seterName = TableObject.getSetterName(param.Field.Name.toString());
 			Class<?> object_class=null;
@@ -70,7 +70,7 @@ public class TableSelector<T extends TableObject> {
 			} else { 
 				factory.getMainClass().getMethod(seterName, new Class[]{param.Value.getClass()}).invoke(obj, param.Value);
 			}
-		} catch (Exception e){
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | NoSuchFieldException e){
 			if( factory.getConnection().isDEBUG() )
 				System.err.println(e.getClass().getName() + ": " + e.getMessage());
 		}
