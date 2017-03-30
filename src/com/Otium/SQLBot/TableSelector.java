@@ -4,20 +4,23 @@
 
 package com.Otium.SQLBot;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.Otium.SQLBot.Record.Parameter;
 
-public class TableSelector<T extends TableObject> {
+public class TableSelector<T extends TableObject> {	
 	private TableFactory<T> factory;
 	private List<T> patterns;	
 	
+	private static Map<Class<?>, List<TableObject>> buffer = new HashMap<>(); 
+	
 	public TableSelector(TableFactory<T> factory) {
 		this.patterns = new ArrayList<>();		
-		this.factory = factory;
+		this.factory = factory;		 
 	}
 		
 	public void	addPattern(T pattern){
@@ -30,8 +33,10 @@ public class TableSelector<T extends TableObject> {
 	
 	public List<T> getList(Integer limit){
 		List<T> list = new ArrayList<T>();
-					
-		List<Record> data = factory.getTable().Select(getConditions(), limit);
+		
+		prepearSelection();
+						
+		List<Record> data = factory.getTable().Select(getConditions(), limit);		
 		
 		for(Record row : data){
 			try {
@@ -50,6 +55,21 @@ public class TableSelector<T extends TableObject> {
 		return list;
 	}
 
+	private void prepearSelection() {
+		for(Field field : factory.getTable().FieldsOfTable){
+			try {
+				Class<?> object_class = getClassOfField(field);
+				if(object_class!=null && TableObject.class.isAssignableFrom(object_class) && !buffer.containsKey(object_class)){
+					TableFactory object_factory = (TableFactory) object_class.getMethod("getTableFactory").invoke(object_class.newInstance());				
+					buffer.put(object_class, new TableSelector<TableObject>(object_factory).getList()); 
+				}
+			} catch (Exception e) {
+				if( factory.getConnection().isDEBUG() )
+					System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			}
+		}		
+	}
+
 	private CollectionRecordsCondition getConditions() {
 		CollectionRecordsCondition conditions = new CollectionRecordsCondition(CollectionRecordsConditionType.AND);	
 		for(T pattern : patterns)
@@ -60,34 +80,34 @@ public class TableSelector<T extends TableObject> {
 	private void setParam(Parameter param, T obj) throws TableObjectNotFoundException {
 		try {
 			String seterName = TableObject.getSetterName(param.Field.Name.toString());
-			Class<?> object_class=null;
-			Object paramType;
-			if((param.Field.Name!=TableFactory.RID_FIELD) && ((paramType=factory.getMainClass().getField(param.Field.Name.toString()).getGenericType()) instanceof ParameterizedType))
-				object_class = (Class<?>) ((ParameterizedType)paramType).getActualTypeArguments()[0];
-			if(object_class!=null && TableObject.class.isAssignableFrom(object_class)){
+			Class<?> object_class = getClassOfField(param.Field);
+			if(buffer.containsKey(object_class)){
 				factory.getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
-				                         .invoke(obj, new SQLTableObject(tryGetTableObject(param, obj, seterName, object_class)));
+				                         .invoke(obj, new SQLTableObject(tryGetTableObject(param)));
 			} else { 
-				factory.getMainClass().getMethod(seterName, new Class[]{param.Value.getClass()}).invoke(obj, param.Value);
+				factory.getMainClass().getMethod(seterName, new Class[]{param.Value.getClass()})
+				                         .invoke(obj, param.Value);
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | NoSuchFieldException e){
+		} catch (Exception e){
 			if( factory.getConnection().isDEBUG() )
 				System.err.println(e.getClass().getName() + ": " + e.getMessage());
 		}
 	}
 
-	private TableObject tryGetTableObject(Parameter param, T obj, String seterName, Class<?> object_class)
-			throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException,
-			TableObjectNotFoundException {
-		TableFactory object_factory = (TableFactory) object_class.getMethod("getTableFactory").invoke(object_class.newInstance());
-		TableSelector selector = new TableSelector(object_factory);
-		TableObject instance = (TableObject)factory.getInstance();
-		instance.setRid((SQLInteger)param.Value);
-		selector.addPattern(instance);
-		List result = selector.getList(1); 
-		if(!result.isEmpty())					
-			return (TableObject) result.get(0);
-		else
-			throw new TableObjectNotFoundException(factory.getTable().NameOfTable, ((SQLInteger)param.Value).get());
+	private TableObject tryGetTableObject(Parameter param) throws TableObjectNotFoundException, NoSuchFieldException, SecurityException {
+		Class<?> object_class = getClassOfField(param.Field);
+		for(TableObject object : buffer.get(object_class))
+			if(object.rid.compareTo(((SQLInteger) param.Value))==0)
+				return object;
+		
+		return null;
+	}
+
+	private Class<?> getClassOfField(Field field) throws NoSuchFieldException {
+		Class<?> object_class=null;
+		Object paramType;
+		if((field.Name!=TableFactory.RID_FIELD) && ((paramType=factory.getMainClass().getField(field.Name.toString()).getGenericType()) instanceof ParameterizedType))
+			object_class = (Class<?>) ((ParameterizedType)paramType).getActualTypeArguments()[0];
+		return object_class;
 	}
 }
