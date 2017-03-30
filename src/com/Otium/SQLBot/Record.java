@@ -91,6 +91,10 @@ public class Record{
 			else
 				addParameter(field, new SQLDateTime((LocalDateTime) null));
 		}
+		else if (field.Type == FieldDataType.REAL){
+			if(object.toString().matches("^[\\-|\\+]*\\d+(\\.\\d+)*\\s*"))
+				addParameter(field, new SQLReal(Double.parseDouble(object.toString())));
+		}
 		else
 			addParameter(field, new SQLText(object.toString()));			
 	}
