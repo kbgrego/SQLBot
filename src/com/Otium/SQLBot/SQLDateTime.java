@@ -1,5 +1,6 @@
 package com.Otium.SQLBot;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,6 +19,10 @@ public class SQLDateTime extends SimpleObjectProperty<LocalDateTime> implements 
 			this.setValue(LocalDateTime.parse(datetime, formatter));
 		else
 			this.setValue(LocalDateTime.parse(datetime + " 00:00:00", formatter));
+	}
+	
+	public SQLDateTime(LocalDate date) {		
+		this.setValue(LocalDateTime.parse(date.format(short_formatter)+ " 00:00:00", formatter));
 	}
 	
 	public SQLDateTime(LocalDateTime datetime) {
