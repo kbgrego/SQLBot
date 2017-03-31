@@ -70,13 +70,6 @@ public class TableSelector<T extends TableObject> {
 		}		
 	}
 
-	private CollectionRecordsCondition getConditions() {
-		CollectionRecordsCondition conditions = new CollectionRecordsCondition(CollectionRecordsConditionType.AND);	
-		for(T pattern : patterns)
-			conditions.add(factory.getObjectRecord(pattern));
-		return conditions;
-	}
-
 	private void setParam(Parameter param, T obj) throws TableObjectNotFoundException {
 		try {
 			String seterName = TableObject.getSetterName(param.Field.Name.toString());
@@ -109,5 +102,20 @@ public class TableSelector<T extends TableObject> {
 		if((field.Name!=TableFactory.RID_FIELD) && ((paramType=factory.getMainClass().getField(field.Name.toString()).getGenericType()) instanceof ParameterizedType))
 			object_class = (Class<?>) ((ParameterizedType)paramType).getActualTypeArguments()[0];
 		return object_class;
+	}
+	
+	public void Delete(){
+		factory.getTable().RecordDelete(getConditions());
+	}
+	
+	public void Update(T sample){
+		factory.getTable().RecordUpdate(factory.getObjectRecord(sample), getConditions());
+	}
+
+	private CollectionRecordsCondition getConditions() {
+		CollectionRecordsCondition conditions = new CollectionRecordsCondition(CollectionRecordsConditionType.AND);	
+		for(T pattern : patterns)
+			conditions.add(factory.getObjectRecord(pattern));
+		return conditions;
 	}
 }
