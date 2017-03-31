@@ -22,6 +22,6 @@ public class SQLTableObject<T extends TableObject> extends SimpleObjectProperty<
 	}
 	
 	public String toString(){
-		return get().toString();
+		return get()==null ? "" : get().toString();
 	}
 }
