@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,6 +112,28 @@ public class ConnectDatabase{
 				System.err.println(e.getClass().getName() + ": " + e.getMessage());
 		}
 		return null;
+	}
+	
+	public int executeInsertQuery(String query) {
+		try{
+			EstablishConnect();
+			if( DEBUG )
+				System.out.println(query);
+			Statement statement = MainSQLConnection.createStatement();
+			try{
+				statement.executeQuery(query);
+			} catch (Exception e) {
+				if( DEBUG && !e.getMessage().equals("query does not return ResultSet"))
+					System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			}
+			ResultSet generatedKeys = statement.executeQuery("SELECT last_insert_rowid();");
+			if(generatedKeys.next())
+				return generatedKeys.getInt(1);
+		} catch (Exception e) {
+			if( DEBUG && !e.getMessage().equals("query does not return ResultSet"))
+				System.err.println(e.getClass().getName() + ": " + e.getMessage());
+		}
+		return 0;
 	}
 	
 	protected boolean isDEBUG(){

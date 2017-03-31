@@ -56,22 +56,10 @@ public class TableFactory<T extends TableObject> {
 	}
 
 	public void Create(TableObject tableObject) {
+		int rid = 0;
 		if(!tableObject.isHasRid())	
-			Table.RecordInsert(getObjectRecord(tableObject));
-		tableObject.setRid(getLastCreatedIndex(tableObject));			
-	}
-	
-	private SQLInteger getLastCreatedIndex(TableObject tableObject){
-		try {
-			CollectionRecordsCondition conditions = new CollectionRecordsCondition();
-			CollectionSorting sorting = new CollectionSorting();
-			Record record = getObjectRecord(tableObject);
-			conditions.add(record);							
-			sorting.add(new TableSorting(Table.getFieldByName(RID_FIELD), SortType.ASC));					
-			return (SQLInteger)Table.Select(conditions, sorting , 1).get(0).getParameterByField(Table.getFieldByName(RID_FIELD)).Value;
-		} catch (FieldNotFoundException e) {
-			return new SQLInteger(0);
-		} 
+			rid = Table.RecordInsert(getObjectRecord(tableObject));
+		tableObject.setRid(rid);			
 	}
 	
 	protected void Update(TableObject tableObject) {

@@ -74,8 +74,8 @@ public class Table{
 		return sequence.toString();
 	}
 	
-	public  void   RecordInsert(Record record){
-		Database.executeQuery(getQueryToDoRecordInsert(record));
+	public  int   RecordInsert(Record record){
+		return Database.executeInsertQuery(getQueryToDoRecordInsert(record));
 	}
 	
 	private String getQueryToDoRecordInsert(Record record){
