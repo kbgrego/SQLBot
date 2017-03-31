@@ -22,7 +22,7 @@ public class SQLDateTime extends SimpleObjectProperty<LocalDateTime> implements 
 	}
 	
 	public SQLDateTime(LocalDate date) {		
-		this.setValue(LocalDateTime.parse(date.format(short_formatter)+ " 00:00:00", formatter));
+		this.set(date);
 	}
 	
 	public SQLDateTime(LocalDateTime datetime) {
@@ -42,6 +42,10 @@ public class SQLDateTime extends SimpleObjectProperty<LocalDateTime> implements 
 			return "''";
 	}
 	
+	public void set(LocalDate date) {
+		this.setValue(LocalDateTime.parse(date.format(short_formatter)+ " 00:00:00", formatter));	
+	}
+
 	public String toString(){
 		return get().format(formatter);
 	}
