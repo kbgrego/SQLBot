@@ -3,7 +3,7 @@ package com.Otium.SQLBot;
 class Settings {
 	private ConnectDatabaseTableSettings SettingsTable;
 	
-	int Increment = 0;
+	int Increment = 1;
 	
 	Settings(ConnectDatabase database){
 		SettingsTable = new ConnectDatabaseTableSettings(database);
