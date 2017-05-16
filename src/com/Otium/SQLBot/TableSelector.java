@@ -4,11 +4,13 @@
 
 package com.Otium.SQLBot;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.Otium.SQLBot.Record.Parameter;
 
@@ -16,7 +18,8 @@ public class TableSelector<T extends TableObject> {
 	private TableFactory<T> factory;
 	private List<T> patterns;	
 	
-	private static Map<Class<?>, List<TableObject>> buffer = new HashMap<>(); 
+	private static Map<Integer, TableObject> OBJECT_BUFFER = new HashMap<>();
+	private List<Class<?>> CLASS_BUFFER = new ArrayList<>();
 	
 	public TableSelector(TableFactory<T> factory) {
 		this.patterns = new ArrayList<>();		
@@ -28,23 +31,63 @@ public class TableSelector<T extends TableObject> {
 	}
 	
 	public List<T> getList(){
-		return getList(0);
+		List<T> list = (List<T>) getSimpleList(factory, getConditions());
+		setTableObjectInBuffer();
+		return list;
 	}
 	
-	public List<T> getList(Integer limit){
-		List<T> list = new ArrayList<T>();
+	private List<TableObject> getSimpleList(TableFactory<?> factory){
+		return getSimpleList(factory, CollectionRecordsCondition.NULL);
+	}
+	
+	private List<TableObject> getSimpleList(TableFactory<?> factory, CollectionRecordsCondition conditions){
+		return getSimpleList(factory, conditions, 0);
+	}
+	
+	private void setTableObjectInBuffer() {
+		for(TableObject object: OBJECT_BUFFER.values()){
+			if(!object.isLoaded){
+				for(Field field : object.getTableFactory().getTable().FieldsOfTable){
+					try {
+						Class<?> object_class = getClassOfField(object.getTableFactory(), field);
+						if(object_class!=null && TableObject.class.isAssignableFrom(object_class)){
+							trySetTableObjectParameter(object, field, object_class);
+						}
+					} catch (Exception e) {
+						if( factory.getConnection().isDEBUG() )
+							System.err.println(e.getClass().getName() + ": " + e.getMessage());
+					}
+				}
+				object.isLoaded = true;
+			}
+		}
+	}
+
+	private void trySetTableObjectParameter(TableObject object, Field field, Class<?> field_class)
+			throws FieldNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		String seterName = TableObject.getSetterName(field.Name.toString());
+		int rid = ((SQLInteger)object.record.getParameterByField(field).Value).get();
+		object.getTableFactory().getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
+			.invoke(object, new SQLTableObject<TableObject>(OBJECT_BUFFER.get(rid)));
+	}
+
+	public List<TableObject> getSimpleList(TableFactory<?> factory, CollectionRecordsCondition conditions,Integer limit){
+		List<TableObject> list = new ArrayList<>();	
 		
-		prepearSelection();
+		//prepearSelection(factory);
 						
-		List<Record> data = factory.getTable().Select(getConditions(), limit);		
+		List<Record> data = factory.getTable().Select(conditions, limit);		
 		
 		for(Record row : data){
 			try {
-				T obj = factory.getInstance();
+				TableObject obj = factory.getInstance();
 				obj.setFactory(factory);
+				obj.record = row;
 				for(Parameter param : row.getParameters())
-					setParam(param, obj);
+					setParam(factory, param, obj);
 		        obj.setListners();
+		        if(!OBJECT_BUFFER.containsKey(obj.rid.get()))
+					OBJECT_BUFFER.put(obj.rid.get(), obj); 
 				list.add(obj);
 			} catch (Exception e) {
 				if( factory.getConnection().isDEBUG() )
@@ -55,28 +98,33 @@ public class TableSelector<T extends TableObject> {
 		return list;
 	}
 
-	private void prepearSelection() {
-		for(Field field : factory.getTable().FieldsOfTable){
+	private void prepearSelection(TableFactory<?> factory, Field field, Class<?> object_class) {
+		if(CLASS_BUFFER.contains(object_class))
+			return;
+		CLASS_BUFFER.add(object_class);
+		/*for(Field field : factory.getTable().FieldsOfTable){*/
 			try {
-				Class<?> object_class = getClassOfField(field);
-				if(object_class!=null && TableObject.class.isAssignableFrom(object_class) && !buffer.containsKey(object_class)){
-					TableFactory object_factory = (TableFactory) object_class.getMethod("getTableFactory").invoke(object_class.newInstance());				
-					buffer.put(object_class, new TableSelector<TableObject>(object_factory).getList()); 
+				if(object_class!=null && TableObject.class.isAssignableFrom(object_class) && !OBJECT_BUFFER.containsKey(object_class)){
+					TableFactory<?> object_factory = (TableFactory<?>) object_class.getMethod("getTableFactory").invoke(object_class.newInstance());
+					getSimpleList(object_factory);
 				}
 			} catch (Exception e) {
 				if( factory.getConnection().isDEBUG() )
 					System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			}
-		}		
+		/*}*/		
 	}
 
-	private void setParam(Parameter param, T obj) throws TableObjectNotFoundException {
+	private void setParam(TableFactory<?> factory, Parameter param, TableObject obj) throws TableObjectNotFoundException {
 		try {
 			String seterName = TableObject.getSetterName(param.Field.Name.toString());
-			Class<?> object_class = getClassOfField(param.Field);
-			if(buffer.containsKey(object_class)){
-				factory.getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
-				                         .invoke(obj, new SQLTableObject(tryGetTableObject(param)));
+			Class<?> object_class = getClassOfField(factory, param.Field);
+			if(object_class!=null && TableObject.class.isAssignableFrom(object_class)){
+				if(OBJECT_BUFFER.containsKey(((SQLInteger)param.Value).get()))
+					factory.getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
+                        .invoke(obj, OBJECT_BUFFER.get(((SQLInteger)param.Value).get()));
+				else
+					prepearSelection(factory, param.Field, object_class);
 			} else { 
 				factory.getMainClass().getMethod(seterName, new Class[]{param.Value.getClass()})
 				                         .invoke(obj, param.Value);
@@ -87,16 +135,7 @@ public class TableSelector<T extends TableObject> {
 		}
 	}
 
-	private TableObject tryGetTableObject(Parameter param) throws TableObjectNotFoundException, NoSuchFieldException, SecurityException {
-		Class<?> object_class = getClassOfField(param.Field);
-		for(TableObject object : buffer.get(object_class))
-			if(object.rid.compareTo(((SQLInteger) param.Value))==0)
-				return object;
-		
-		return null;
-	}
-
-	private Class<?> getClassOfField(Field field) throws NoSuchFieldException {
+	private Class<?> getClassOfField(TableFactory<?> factory, Field field) throws NoSuchFieldException {
 		Class<?> object_class=null;
 		Object paramType;
 		if((field.Name!=TableFactory.RID_FIELD) && ((paramType=factory.getMainClass().getField(field.Name.toString()).getGenericType()) instanceof ParameterizedType))

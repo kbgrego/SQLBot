@@ -30,12 +30,14 @@ public class ConnectDatabase{
 	public  Connection MainSQLConnection;
 	private String     DatabaseName = "main.db";
 	private boolean    DEBUG = false;
+	private Settings   Settings;
 		
 	/** 
 	 * Initial file db with a name of file 
 	 */
 	public ConnectDatabase(String string) {
 		ChangeMainDatabase(string);
+		Settings = new Settings(this);
 	}
 
 	public void EstablishConnect() throws ClassNotFoundException, SQLException{
@@ -103,7 +105,7 @@ public class ConnectDatabase{
 	public ResultSet executeQuery(String query) {
 		try{
 			EstablishConnect();
-			if( DEBUG )
+			//if( DEBUG )
 				System.out.println(query);
 			return MainSQLConnection.createStatement()
 					                .executeQuery(query);
@@ -134,6 +136,11 @@ public class ConnectDatabase{
 				System.err.println(e.getClass().getName() + ": " + e.getMessage());
 		}
 		return 0;
+	}
+	
+	public int getIncrement(){
+		
+		return Settings.getIncrement();
 	}
 	
 	protected boolean isDEBUG(){

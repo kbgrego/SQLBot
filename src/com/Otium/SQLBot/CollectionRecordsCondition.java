@@ -8,6 +8,8 @@ public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 	private static final long serialVersionUID = -2527722864096743032L;
 	private static final int FIRST_INDEX = 0;
 	
+	public  static final CollectionRecordsCondition NULL = new CollectionRecordsCondition();
+	
 	private CollectionRecordsConditionType type;
 	
 	public CollectionRecordsCondition() {

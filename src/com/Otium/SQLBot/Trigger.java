@@ -16,8 +16,9 @@ class Trigger{
 	TriggerAction   TriggerAction;	
 	TABLE           TableName;
 	
-	Trigger(String triggerName, TriggerAction triggerAction, TABLE tableName){
+	Trigger(String triggerName, TriggerAction triggerAction, TABLE tableName, ConnectDatabase database){
 		//initialization
+		this.Database      = database;
 		this.TriggerName   = triggerName;
 		this.TriggerAction = triggerAction;
 		this.TableName     = tableName;
@@ -33,7 +34,8 @@ class Trigger{
 		StringBuffer query = new StringBuffer();
 		
 		query.append("CREATE TRIGGER IF NOT EXISTS ") 
-			 .append("'").append(this.TriggerName).append("' ")			 
+			 .append("'").append(this.TriggerName).append("' ")
+			 .append(" AFTER ")
 			 .append(this.TriggerAction)
 			 .append(" ON ")
 			 .append("`").append(this.TableName).append("`")

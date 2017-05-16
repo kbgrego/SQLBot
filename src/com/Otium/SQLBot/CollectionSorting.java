@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class CollectionSorting extends ArrayList<TableSorting> {
 	private static final long serialVersionUID = 5841719410922880652L;
 	private static final int FIRST_INDEX = 0;
+	public static final CollectionSorting NULL = new CollectionSorting();
 	
 	public boolean add(TableSorting sorting){
 		return super.add(sorting);		

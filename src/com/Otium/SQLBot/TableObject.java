@@ -23,10 +23,17 @@ public abstract class TableObject {
 	@SQLBotIgnore private TableFactory<? extends TableObject> Factory;
 	
 	@SQLBotIgnore
-	protected SQLInteger rid; 
+	protected SQLInteger rid;
+	
+	@SQLBotIgnore
+	protected Record record; 
+	
+	@SQLBotIgnore
+	protected boolean isLoaded; 
 	
 	private TableObject(){
 		rid = new SQLInteger(0);
+		isLoaded = false;
 	}
 	
 	protected TableObject(TableFactory<? extends TableObject> table){
@@ -42,7 +49,16 @@ public abstract class TableObject {
 	}
 	
 	@SQLBotIgnore
-	public void Save(){
+	public void Save(){		
+		if(isHasRid())
+			Factory.Update(this);
+		else
+			Factory.Create(this);
+		
+		saveFields();
+	}
+
+	private void saveFields() {
 		TableObject object;
 		for(Field field : Factory.getTable().FieldsOfTable){
 			try {
@@ -58,11 +74,6 @@ public abstract class TableObject {
 					e.printStackTrace();
 			}
 		}
-			
-		if(isHasRid())
-			Factory.Update(this);
-		else
-			Factory.Create(this);
 	}
 	
 	@SQLBotIgnore

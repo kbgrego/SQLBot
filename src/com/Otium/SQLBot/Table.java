@@ -31,13 +31,14 @@ public class Table{
 	
 	public  void   Create(){
 		Database.executeQuery(getQueryOfCreatingTable());
+		createAutoincrementTrigger();
 	}	
 	
 	private String getQueryOfCreatingTable(){
 		
 		StringBuffer query = new StringBuffer();
 
-		query.append("Create table if not exists '" + this.NameOfTable + "' (")
+		query.append("CREATE TABLE IF NOT EXISTS '" + this.NameOfTable + "' (")
 		     .append(getSequenceOfTableFields())
 		     .append(getSequenceOfTablePrimaryKeys())
 		     .append(")");
@@ -74,6 +75,12 @@ public class Table{
 		return sequence.toString();
 	}
 	
+	private void createAutoincrementTrigger() {
+		Trigger trigger = new Trigger(NameOfTable + ".AutoIncrement", TriggerAction.INSERT, NameOfTable, Database);
+		trigger.TriggerContent = "UPDATE `sqlite_sequence` SET seq = NEW.`rid`;";
+		trigger.Create();
+	}
+
 	public  int   RecordInsert(Record record){
 		return Database.executeInsertQuery(getQueryToDoRecordInsert(record));
 	}
@@ -129,11 +136,11 @@ public class Table{
 	}
 	
 	public List<Record> Select(int limit) {
-		return Select(new CollectionRecordsCondition(), limit);
+		return Select(CollectionRecordsCondition.NULL, limit);
 	}
 	
 	public List<Record> Select(CollectionRecordsCondition conditions, int limit){
-		return Select(conditions, new CollectionSorting(), limit);
+		return Select(conditions, CollectionSorting.NULL, limit);
 	}
 	
 	public List<Record> Select(CollectionRecordsCondition conditions, CollectionSorting sorting, int limit){

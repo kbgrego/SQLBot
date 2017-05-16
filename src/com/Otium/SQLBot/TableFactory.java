@@ -57,8 +57,9 @@ public class TableFactory<T extends TableObject> {
 
 	public void Create(TableObject tableObject) {
 		int rid = 0;
-		if(!tableObject.isHasRid())	
-			rid = Table.RecordInsert(getObjectRecord(tableObject));
+		/*if(!tableObject.isHasRid())*/	
+		tableObject.rid.set(Connection.getIncrement());
+		rid = Table.RecordInsert(getObjectRecord(tableObject));
 		tableObject.setRid(rid);			
 	}
 	
