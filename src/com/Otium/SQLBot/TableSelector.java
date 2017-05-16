@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.Otium.SQLBot.Record.Parameter;
 
@@ -73,8 +72,6 @@ public class TableSelector<T extends TableObject> {
 
 	public List<TableObject> getSimpleList(TableFactory<?> factory, CollectionRecordsCondition conditions,Integer limit){
 		List<TableObject> list = new ArrayList<>();	
-		
-		//prepearSelection(factory);
 						
 		List<Record> data = factory.getTable().Select(conditions, limit);		
 		
@@ -102,17 +99,16 @@ public class TableSelector<T extends TableObject> {
 		if(CLASS_BUFFER.contains(object_class))
 			return;
 		CLASS_BUFFER.add(object_class);
-		/*for(Field field : factory.getTable().FieldsOfTable){*/
-			try {
-				if(object_class!=null && TableObject.class.isAssignableFrom(object_class) && !OBJECT_BUFFER.containsKey(object_class)){
-					TableFactory<?> object_factory = (TableFactory<?>) object_class.getMethod("getTableFactory").invoke(object_class.newInstance());
-					getSimpleList(object_factory);
-				}
-			} catch (Exception e) {
-				if( factory.getConnection().isDEBUG() )
-					System.err.println(e.getClass().getName() + ": " + e.getMessage());
+
+		try {
+			if(object_class!=null && TableObject.class.isAssignableFrom(object_class) && !OBJECT_BUFFER.containsKey(object_class)){
+				TableFactory<?> object_factory = (TableFactory<?>) object_class.getMethod("getTableFactory").invoke(object_class.newInstance());
+				getSimpleList(object_factory);
 			}
-		/*}*/		
+		} catch (Exception e) {
+			if( factory.getConnection().isDEBUG() )
+				System.err.println(e.getClass().getName() + ": " + e.getMessage());
+		}
 	}
 
 	private void setParam(TableFactory<?> factory, Parameter param, TableObject obj) throws TableObjectNotFoundException {
@@ -122,7 +118,7 @@ public class TableSelector<T extends TableObject> {
 			if(object_class!=null && TableObject.class.isAssignableFrom(object_class)){
 				if(OBJECT_BUFFER.containsKey(((SQLInteger)param.Value).get()))
 					factory.getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
-                        .invoke(obj, OBJECT_BUFFER.get(((SQLInteger)param.Value).get()));
+                        .invoke(obj, new SQLTableObject<>(OBJECT_BUFFER.get(((SQLInteger)param.Value).get())));
 				else
 					prepearSelection(factory, param.Field, object_class);
 			} else { 
