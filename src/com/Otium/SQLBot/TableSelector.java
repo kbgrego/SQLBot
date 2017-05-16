@@ -80,11 +80,12 @@ public class TableSelector<T extends TableObject> {
 				TableObject obj = factory.getInstance();
 				obj.setFactory(factory);
 				obj.record = row;
+				int rid = ((SQLInteger)row.getParameterByField(factory.getTable().getFieldByName(TableFactory.RID_FIELD)).Value).get(); 
+		        if(!OBJECT_BUFFER.containsKey(rid))
+					OBJECT_BUFFER.put(rid, obj); 
 				for(Parameter param : row.getParameters())
 					setParam(factory, param, obj);
 		        obj.setListners();
-		        if(!OBJECT_BUFFER.containsKey(obj.rid.get()))
-					OBJECT_BUFFER.put(obj.rid.get(), obj); 
 				list.add(obj);
 			} catch (Exception e) {
 				if( factory.getConnection().isDEBUG() )
@@ -119,8 +120,11 @@ public class TableSelector<T extends TableObject> {
 				if(OBJECT_BUFFER.containsKey(((SQLInteger)param.Value).get()))
 					factory.getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
                         .invoke(obj, new SQLTableObject<>(OBJECT_BUFFER.get(((SQLInteger)param.Value).get())));
-				else
+				else {
 					prepearSelection(factory, param.Field, object_class);
+					factory.getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
+                    	.invoke(obj, new SQLTableObject<>(OBJECT_BUFFER.get(((SQLInteger)param.Value).get())));
+				}
 			} else { 
 				factory.getMainClass().getMethod(seterName, new Class[]{param.Value.getClass()})
 				                         .invoke(obj, param.Value);
