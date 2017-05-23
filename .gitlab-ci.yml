@@ -1,0 +1,13 @@
+image: maven:3-jdk-8
+test_build:
+  script:
+  - mvn install -B
+  - cd ~
+  - wget https://docs.google.com/uc?id=0B3X9GlR6EmbnWksyTEtCM0VfaFE&export=download
+  - mv uc\?id\=0B3X9GlR6EmbnWksyTEtCM0VfaFE gdrive
+  - chmod +x gdrive
+  - sudo install gdrive /usr/local/bin/gdrive
+  - gdrive -c /builds/kbgrego/SQLBot/ list
+  - gdrive -c /builds/kbgrego/SQLBot/ upload /builds/kbgrego/SQLBot/target/SQLBot-1.0.jar
+  - gdrive -c /builds/kbgrego/SQLBot/ list
+  when: manual

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>SQLBot</groupId>
   <artifactId>SQLBot</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
@@ -23,4 +23,8 @@
 		<version>3.8.7</version>
 	</dependency>    
   </dependencies>
+    <organization>
+    	<name>Otium Group</name>
+    	<url>http://may-project.pp.ua</url>
+    </organization>
 </project>
