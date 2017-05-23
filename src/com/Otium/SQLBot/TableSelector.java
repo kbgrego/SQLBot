@@ -64,10 +64,10 @@ public class TableSelector<T extends TableObject> {
 
 	private void trySetTableObjectParameter(TableObject object, Field field, Class<?> field_class)
 			throws FieldNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		String seterName = TableObject.getSetterName(field.Name.toString());
+		String getterName = TableObject.getGetterName(field.Name.toString());
 		int rid = ((SQLInteger)object.record.getParameterByField(field).Value).get();
-		object.getTableFactory().getMainClass().getMethod(seterName, new Class[]{SQLTableObject.class})
-			.invoke(object, new SQLTableObject<TableObject>(OBJECT_BUFFER.get(rid)));
+		SQLTableObject<TableObject> field_object = (SQLTableObject<TableObject>) object.getTableFactory().getMainClass().getMethod(getterName).invoke(object);
+		field_object.set(OBJECT_BUFFER.get(rid));
 	}
 
 	public List<TableObject> getSimpleList(TableFactory<?> factory, CollectionRecordsCondition conditions,Integer limit){
