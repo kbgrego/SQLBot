@@ -99,6 +99,34 @@ public class Table{
 		return query.toString();
 	}
 	
+	public  int   RecordsInsert(List<Record> records){
+		if(records.isEmpty())
+			return 0;
+		return Database.executeInsertQuery(getQueryToDoRecordsInsert(records));
+	}
+	
+	private String getQueryToDoRecordsInsert(List<Record> records){
+		StringBuffer query  = new StringBuffer();
+		
+		query.append("INSERT OR IGNORE INTO `") 
+		     .append(this.NameOfTable)
+		     .append("` (") 
+		     	.append(records.get(0).getParameters().getQuerySequenceOfFields())
+		     .append(") VALUES \n\t(")
+				.append(records.get(0).getParameters().getQuerySequenceOfValues())
+			 .append(")");
+		
+		for(int i=1; i<records.size();i++)
+          query.append(",\n\t(")
+               .append(records.get(i).getParameters().getQuerySequenceOfValues())
+               .append(")");
+		
+        query.append(";"); 
+
+		return query.toString();
+	}
+	
+	
 	public  void   RecordUpdate(Record record, CollectionRecordsCondition conditions){
 		Database.executeQuery(getQueryToDoRecordUpdate(record, conditions));
 	}
