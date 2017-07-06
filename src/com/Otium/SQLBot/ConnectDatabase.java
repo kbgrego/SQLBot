@@ -138,9 +138,12 @@ public class ConnectDatabase{
 		return 0;
 	}
 	
-	public int getIncrement(){
-		
+	public int getIncrement(){		
 		return Settings.getIncrement();
+	}
+	
+	public int getIncrement(int size){		
+		return Settings.getIncrement(size);
 	}
 	
 	protected boolean isDEBUG(){
