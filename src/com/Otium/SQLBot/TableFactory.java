@@ -5,6 +5,7 @@ package com.Otium.SQLBot;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.Otium.SQLBot.Field.FIELD;
@@ -57,10 +58,25 @@ public class TableFactory<T extends TableObject> {
 
 	public void Create(TableObject tableObject) {
 		int rid = 0;
-		/*if(!tableObject.isHasRid())*/	
 		tableObject.rid.set(Connection.getIncrement());
 		rid = Table.RecordInsert(getObjectRecord(tableObject));
 		tableObject.setRid(rid);			
+	}
+	
+	public  int   Create(List<? extends TableObject> samples){
+		List<Record> records = new ArrayList<>();
+		for(TableObject sample : samples)		
+			records.add(getObjectRecord(sample));
+		
+		Connection.getIncrement(records.size());		
+		int last = getTable().RecordsInsert(records);
+		
+		for(int id=last-samples.size()+1,j=0;id<=last;id++,j++)
+			samples.get(j).getRid().set(id);
+		
+		if(records.isEmpty())
+			return 0;		
+		return last;
 	}
 	
 	protected void Update(TableObject tableObject) {

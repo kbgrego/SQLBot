@@ -17,4 +17,8 @@ class Settings {
 	int getIncrement(){
 		return Increment++;
 	}
+	
+	int getIncrement(int size){
+		return Increment=Increment+size;
+	}
 }
