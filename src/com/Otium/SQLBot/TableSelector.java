@@ -152,12 +152,7 @@ public class TableSelector<T extends TableObject> {
 	}
 	
 	public void Create(List<T> samples){
-		List<Record> records = new ArrayList<>();
-		for(T sample : samples)		
-			records.add(factory.getObjectRecord(sample));
-		int last = factory.getTable().RecordsInsert(records);
-		for(int id=last-samples.size()+1,j=0;id<=last;id++,j++)
-			samples.get(j).getRid().set(id);
+		factory.Create(samples);
 	}
 
 	private CollectionRecordsCondition getConditions() {
