@@ -11,7 +11,8 @@ package com.Otium.SQLBot;
 public enum FieldDataType {
 	INTEGER,
 	TEXT,
-	DATETIME, 
+	DATETIME,
+	DATE,
 	REAL,
 	BLOB
 }

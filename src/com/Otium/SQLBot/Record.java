@@ -3,6 +3,7 @@
  */
 package com.Otium.SQLBot;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -76,6 +77,7 @@ public class Record{
 				case INTEGER:  addParameter(field, new SQLInteger((Integer) object));break;
 				case BLOB:     addParameter(field, new SQLBlob());break;
 				case DATETIME: addParameter(field, new SQLDateTime((LocalDateTime) null));break;
+				case DATE:     addParameter(field, new SQLDate((LocalDate) null));break;
 				case REAL:     addParameter(field, new SQLReal());break;
 				case TEXT:     addParameter(field, new SQLText(null));break;
 			}
@@ -90,6 +92,12 @@ public class Record{
 				addParameter(field, new SQLDateTime(object.toString()));
 			else
 				addParameter(field, new SQLDateTime((LocalDateTime) null));
+		}
+		else if (field.Type == FieldDataType.DATE){
+			if(object.toString().matches("(\\d{4})-(\\d{2})-(\\d{2})"))
+				addParameter(field, new SQLDate(object.toString()));
+			else
+				addParameter(field, new SQLDate((LocalDate) null));
 		}
 		else if (field.Type == FieldDataType.REAL){
 			if(object.toString().matches("^[\\-|\\+]*\\d+(\\.\\d+)*\\s*"))

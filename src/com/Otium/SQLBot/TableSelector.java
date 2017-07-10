@@ -15,18 +15,25 @@ import com.Otium.SQLBot.Record.Parameter;
 
 public class TableSelector<T extends TableObject> {	
 	private TableFactory<T> factory;
-	private List<T> patterns;	
+	private List<T> patterns;
+	private List<ConditionType> types;
 	
 	private static Map<Integer, TableObject> OBJECT_BUFFER = new HashMap<>();
 	private List<Class<?>> CLASS_BUFFER = new ArrayList<>();
 	
 	public TableSelector(TableFactory<T> factory) {
-		this.patterns = new ArrayList<>();		
-		this.factory = factory;		 
+		this.patterns = new ArrayList<>();
+		this.types = new ArrayList<>();
+		this.factory = factory;		 		
 	}
 		
 	public void	addPattern(T pattern){
+		addPattern(pattern, ConditionType.EQUALS);
+	}
+	
+	public void	addPattern(T pattern, ConditionType type){
 		patterns.add(pattern);
+		types.add(type);
 	}
 	
 	public List<T> getList(){
@@ -157,8 +164,8 @@ public class TableSelector<T extends TableObject> {
 
 	private CollectionRecordsCondition getConditions() {
 		CollectionRecordsCondition conditions = new CollectionRecordsCondition(CollectionRecordsConditionType.AND);	
-		for(T pattern : patterns)
-			conditions.add(factory.getObjectRecord(pattern));
+		for(int i=0; i<patterns.size();i++)
+			conditions.add(factory.getObjectRecord(patterns.get(i)), types.get(i));
 		return conditions;
 	}
 }

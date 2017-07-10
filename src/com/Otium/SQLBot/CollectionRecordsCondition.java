@@ -31,6 +31,13 @@ public class CollectionRecordsCondition extends ArrayList<RecordsCondition> {
 		return true;
 	}
 	
+	public boolean add(Record record, ConditionType type){
+		if(record!=null)
+			for(Parameter param : record.getParameters())
+				add(param.Field, type, param.Value);
+		return true;
+	}
+	
 	public boolean add(Field field, ConditionType type, SQLData value){
 		return super.add(new RecordsCondition(field, type, value));
 	}
