@@ -105,7 +105,7 @@ public class ConnectDatabase{
 	public ResultSet executeQuery(String query) {
 		try{
 			EstablishConnect();
-			//if( DEBUG )
+			if( DEBUG )
 				System.out.println(query);
 			return MainSQLConnection.createStatement()
 					                .executeQuery(query);
